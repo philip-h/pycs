@@ -1,0 +1,21 @@
+[project]
+name = "pycs"
+version = "1.0.0"
+description = "Python code checker / grader"
+dependencies = [
+    "flask",
+    "flask_sqlalchemy",
+    "flask_login",
+    "flask_wtf"
+]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["pycs"]
