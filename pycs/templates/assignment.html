@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}pycs/assignment{% endblock %}
+
+{% block content%}
+<div class="container">
+  <h1 class="assignment-title">{{ assignment.name }}</h1>
+  <div class="container--surface">
+    <!-- Field errors -->
+    {% if form.errors %}
+    <ul class="form-errors">
+        {% for _, ferrors in form.errors|dictsort if ferrors %}
+            {% for error in ferrors %}
+                <li class="form-errors__error">{{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+    {% endif %}
+    
+    <form action="" method="post" enctype="multipart/form-data">
+      {{ form.csrf_token }}
+      <div class="form__input">
+        {{ form.code(class="form__input__file") }}
+      </div>
+      <input class="form__input__submit" type="submit" value={{ "Upload" if not data else "ReUpload"}}>
+    </form>
+  </div>
+</div>
+
+<div class="container assignment-info">
+  {% if data%}
+  <h2 class="assignment-info__title">Grade: {{ data.score }} / {{ assignment.total_points }}</h2>
+  {% else %}
+  <h2 class="assignment-info__title">Not submitted yet!</h2>
+  {% endif %}
+  <p class="assignment-info__due">Due: {{ assignment.due_date.strftime("%a %b %-d, %Y @ %H:%M") }}</p>
+</div>
+{% endblock %}

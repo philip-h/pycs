@@ -1,0 +1,6 @@
+{% macro render_field(field) %}
+    <div class="form__input">
+        {{ field.label(class="form__input__label") }}
+        {{ field(class="form__input__field", **kwargs)|safe }}
+    </div>
+{% endmacro %}

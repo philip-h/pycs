@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>~/{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script defer async src="{{ url_for('static', filename='script.js')}}"></script>
+</head>
+<body class="app">
+  <nav class="nav">
+    <div class="nav__brand">
+      <a class="nav__brand__link" href="{{ url_for('.index') }}">PYCS</a>
+    </div>
+    {% if current_user.is_authenticated %}
+        <p>Hey {{ current_user.first_name }}!</p>
+        <div class="nav__menu-button" id="navMenuButton">
+          <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 32 32" width="16px" fill="currentColor"><path d="M13 16c0 1.654 1.346 3 3 3s3-1.346 3-3-1.346-3-3-3-3 1.346-3 3zM13 26c0 1.654 1.346 3 3 3s3-1.346 3-3-1.346-3-3-3-3 1.346-3 3zM13 6c0 1.654 1.346 3 3 3s3-1.346 3-3-1.346-3-3-3-3 1.346-3 3z"/></svg>
+        </div>
+        <div class="container container--surface nav__menu" id="navMenu">
+          <div class="nav__menu__items">
+            {% if current_user.is_admin %}
+              <a class="nav__menu__item" href="{{ url_for('admin.index') }}">Admin</a>
+              <hr class="surface-divider">
+            {% endif %}
+            <a class="nav__menu__item" href="{{ url_for('.change_pass') }}">Change Password</a>
+            <hr class="surface-divider">
+            <a class="nav__menu__item" href="{{ url_for('.logout') }}">Logout</a>
+          </div>
+        </div>
+    {% else %}
+        <div class="nav__links">
+          <a class="nav__link" href="{{ url_for('.register') }}">Register</a>
+          <a class="nav__link" href="{{ url_for('.login') }}">Login</a>
+        </div>
+    {% endif %}
+  </nav> 
+
+  {% block content %}{% endblock %}
+</body>
+</html>
