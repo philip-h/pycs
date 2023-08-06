@@ -38,6 +38,14 @@ def create_app(test_config=None):
     except OSError as e:
         print("Uploads folder could not be created", e)
 
+    # Make sure pytest folder exists!
+    try:
+        os.makedirs(os.path.join(app.instance_path, app.config["UPLOAD_FOLDER"], "tests"))
+    except FileExistsError:
+        print("Tests folder already exists :)")
+    except OSError as e:
+        print("Tests folder could not be created", e)
+
     # Setup database
     from . import models
 

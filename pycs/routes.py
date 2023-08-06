@@ -181,17 +181,26 @@ def assignment(id):
     form = UploadCodeForm()
 
     if form.validate_on_submit():
+        # Make student directory if it dne
+        student_dir = os.path.join(
+            current_app.config["UPLOAD_FOLDER"],
+            f"{current_user.student_number}"
+        )
+        if not os.path.exists(student_dir):
+            os.makedirs(student_dir)
+
         code_file = form.code.data
         filename = secure_filename(code_file.filename)
         if assignment.verify_filename(filename):
             upload_path = os.path.join(
-                current_app.config["UPLOAD_FOLDER"],
-                f"{current_user.student_number}_{filename}",
+                student_dir,
+                f"{filename}",
             )
 
             # Score the user's submission
-            score = _calculate_score(upload_path)
+            # score = _calculate_score(upload_path)
 
+            score = 2
             # Create the association
             user_assignment = UserAssignment(score=score, uploaded_filepath=upload_path)
             user_assignment.assignment = assignment
@@ -208,8 +217,3 @@ def assignment(id):
     return render_template(
         "assignment.html", assignment=assignment, data=user_assignment, form=form
     )
-
-
-# TODO: Put this in it's own module
-def _calculate_score(upload_path):
-    return 1

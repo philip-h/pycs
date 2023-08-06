@@ -3,12 +3,15 @@ author: @philiph
 Flask-Admin configuration
 """
 
-from flask import redirect, url_for
+import os
+from flask import redirect, url_for, current_app
 from flask_admin import Admin
 from flask_admin.menu import MenuLink
 from flask_admin.contrib.sqla import ModelView
 from .models import User, Assignment, UserAssignment, db
 from flask_login import current_user
+from flask_wtf.file import FileField
+from werkzeug.utils import secure_filename
 
 
 class AdminMV(ModelView):
@@ -30,7 +33,20 @@ class AdminUserMV(AdminMV):
 
 
 class AdminAssignmentMV(AdminMV):
-    pass
+    def scaffold_form(self):
+        form_class = super(AdminAssignmentMV, self).scaffold_form()
+        form_class.pytest_file = FileField("Pytest File")
+        return form_class
+
+    def update_model(self, form, model):
+        form.populate_obj(model)
+        pytest_file = form.pytest_file.data
+        if pytest_file:
+            filename = secure_filename(pytest_file.filename)
+            upload_path = os.path.join(
+                current_app.config["UPLOAD_FOLDER"], "tests", filename
+            )
+            pytest_file.save(upload_path)
 
 
 class AdminScoresMV(AdminMV):
