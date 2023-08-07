@@ -4,17 +4,21 @@ Flask-Admin configuration
 """
 
 import os
+
 from flask import redirect, url_for, current_app
 from flask_admin import Admin
 from flask_admin.menu import MenuLink
 from flask_admin.contrib.sqla import ModelView
-from .models import User, Assignment, UserAssignment, db
 from flask_login import current_user
 from flask_wtf.file import FileField
 from werkzeug.utils import secure_filename
 
+from .models import User, Assignment, UserAssignment, db
+
 
 class AdminMV(ModelView):
+    """Parent ModelView for Flask-Admin"""
+
     column_display_pk = True
 
     def is_accessible(self):
@@ -25,6 +29,8 @@ class AdminMV(ModelView):
 
 
 class AdminUserMV(AdminMV):
+    """Flask-Admin user page"""
+
     column_searchable_list = [
         "first_name",
     ]
@@ -33,6 +39,8 @@ class AdminUserMV(AdminMV):
 
 
 class AdminAssignmentMV(AdminMV):
+    """Flask-Admin Assignment Page"""
+
     def scaffold_form(self):
         form_class = super(AdminAssignmentMV, self).scaffold_form()
         form_class.pytest_file = FileField("Pytest File")
@@ -50,6 +58,8 @@ class AdminAssignmentMV(AdminMV):
 
 
 class AdminScoresMV(AdminMV):
+    """Flask-Admin User-Assignment Association page"""
+
     column_list = ["user", "assignment", "score", "uploaded_filepath"]
     column_editable_list = [
         "score",
@@ -58,6 +68,7 @@ class AdminScoresMV(AdminMV):
 
 
 def init_admin(app):
+    """Used to register Flask-Admin with local Flask app context"""
     admin = Admin(app)
     admin.add_view(AdminUserMV(User, db.session))
     admin.add_view(AdminAssignmentMV(Assignment, db.session))

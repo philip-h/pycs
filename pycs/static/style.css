@@ -280,6 +280,15 @@ img, svg {
     font-size: 1.5rem;
 }
 
+.assignment-comments {
+    margin-bottom: 2rem;
+}
+
+.assignment-comment {
+    font-family: monospace;
+    font-size: 1rem;
+}
+
 @media (prefers-color-scheme: light) {
     :root {
         --clr-primary: rgb(255, 255, 255);

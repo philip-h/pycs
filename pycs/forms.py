@@ -10,6 +10,7 @@ from wtforms.validators import DataRequired, EqualTo, Length
 
 
 class UserPassForm(FlaskForm):
+    """A parent form that contains student_number and password fields"""
     student_number = StringField(
         "Student number",
         validators=[
@@ -27,6 +28,7 @@ class UserPassForm(FlaskForm):
 
 
 class RegisterForm(UserPassForm):
+    """Registration requires a first name and another field to confirm their password"""
     first_name = StringField("First name", validators=[DataRequired()])
     confirm_pass = PasswordField(
         "Confirm password",
@@ -39,11 +41,13 @@ class RegisterForm(UserPassForm):
 
 
 class LoginForm(UserPassForm):
+    """Login form gives user's the option to remember their session (Thanks Flask-Login)"""
     remember = BooleanField("Remember me?")
     submit = SubmitField(label="Login")
 
 
 class ChangePassForm(FlaskForm):
+    """Change password form"""
     current_pass = PasswordField(
         "Current password",
         validators=[
@@ -69,6 +73,7 @@ class ChangePassForm(FlaskForm):
 
 
 class UploadCodeForm(FlaskForm):
+    """Upload code Form"""
     code = FileField(
         validators=[FileRequired(), FileAllowed(["py"], "Python code only")]
     )

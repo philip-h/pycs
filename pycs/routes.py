@@ -2,6 +2,11 @@
 author: @philiph
 All Pycs application routes.
 """
+import os
+from datetime import datetime
+import functools
+from http import HTTPStatus
+from pathlib import Path
 
 from flask import (
     Blueprint,
@@ -11,16 +16,11 @@ from flask import (
     current_app,
     request,
 )
+
 from flask_login import LoginManager, login_user, logout_user, current_user
 from sqlalchemy import exc
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
-
-import os
-from datetime import datetime
-import functools
-from http import HTTPStatus
-from pathlib import Path
 
 from .forms import RegisterForm, LoginForm, ChangePassForm, UploadCodeForm
 from .models import Assignment, User, UserAssignment, db
@@ -37,10 +37,11 @@ login_manager = LoginManager()
 
 # Authorization decorator
 def login_required(view):
+    """If a route requires the user to be logged in, force a 401 error!"""
+
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if not current_user.is_authenticated:
-            # return redirect(url_for(".index"))
             abort(HTTPStatus.UNAUTHORIZED)
 
         return view(**kwargs)
@@ -50,6 +51,7 @@ def login_required(view):
 
 @routes.route("/register", methods=["GET", "POST"])
 def register():
+    """Handles user registration."""
     form = RegisterForm()
     if form.validate_on_submit():
         new_user = User(
@@ -60,7 +62,7 @@ def register():
         db.session.add(new_user)
         try:
             db.session.commit()
-        except exc.IntegrityError as e:
+        except exc.IntegrityError:
             form.student_number.errors.append(
                 f"Student {form.student_number.data} is already registered."
             )
@@ -73,6 +75,7 @@ def register():
 
 @routes.route("/login", methods=["GET", "POST"])
 def login():
+    """Handles User login. Uses sessions through Flask-Login"""
     form = LoginForm()
     if form.validate_on_submit():
         remember = bool(form.data.get("remember"))
@@ -93,6 +96,7 @@ def login():
 @routes.route("/changepass", methods=["GET", "POST"])
 @login_required
 def change_pass():
+    """Handles the changing of a user's password."""
     form = ChangePassForm()
     if form.validate_on_submit():
         # Verify current password
@@ -114,6 +118,7 @@ def change_pass():
 
 @routes.get("/logout")
 def logout():
+    """Log the user out (Again, thanks Flask-Login)"""
     logout_user()
     return redirect(url_for(".index"))
 
@@ -125,6 +130,9 @@ def logout():
 
 @routes.get("/")
 def index():
+    """The main page of the application.
+    If the user is logged out, show a landing page, otherwise show a list of assignments.
+    """
     # Authentication required for this route!
     # Stated explicitly here because @login_required always
     # redirects to index
@@ -162,6 +170,8 @@ def index():
 @routes.route("/<int:id>/assignment", methods=["GET", "POST"])
 @login_required
 def assignment(id):
+    """Shows the grade and comments of an assignment.
+    Every assignment page gives the user the ability to (Re)Upload an assignment"""
     assignment, user_assignment = db.session.execute(
         db.select(Assignment, UserAssignment)
         .outerjoin(

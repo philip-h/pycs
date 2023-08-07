@@ -9,7 +9,7 @@ from flask import Flask, render_template
 
 
 def create_app(test_config=None):
-    # Create and configure Flask app
+    """Create and configure the Flask app"""
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY="dev",  # TODO: Change this
@@ -27,24 +27,24 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except FileExistsError:
         print("Instance path already exists :)")
-    except OSError as e:
-        print("Instance path could not be created", e)
+    except OSError as os_error:
+        print("Instance path could not be created", os_error)
 
     # Make sure uploads folder exists!
     try:
         os.makedirs(os.path.join(app.instance_path, app.config["UPLOAD_FOLDER"]))
     except FileExistsError:
         print("Uploads folder already exists :)")
-    except OSError as e:
-        print("Uploads folder could not be created", e)
+    except OSError as os_error:
+        print("Uploads folder could not be created", os_error)
 
     # Make sure pytest folder exists!
     try:
         os.makedirs(os.path.join(app.instance_path, app.config["UPLOAD_FOLDER"], "tests"))
     except FileExistsError:
         print("Tests folder already exists :)")
-    except OSError as e:
-        print("Tests folder could not be created", e)
+    except OSError as os_error:
+        print("Tests folder could not be created", os_error)
 
     # Setup database
     from . import models
@@ -73,9 +73,9 @@ def create_app(test_config=None):
 
     admin.init_admin(app)
 
-    # Test route
     @app.get("/hello")
     def hello():
+        """Test route"""
         return "Yell Banana!"
 
     ###############################################################################
@@ -83,10 +83,12 @@ def create_app(test_config=None):
     ###############################################################################
     @app.errorhandler(401)
     def unauthorized(error):
+        """Customm 401 Unauthorized page"""
         return render_template("401.html", error=error), 401
 
     @app.errorhandler(404)
     def not_found(error):
+        """Custom 404 Not Found page"""
         return render_template("404.html", error=error), 404
 
     return app

@@ -3,6 +3,7 @@ author: @philiph
 Database models for Pycs using Flask-SQLAlchemy
 """
 
+from datetime import datetime
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -10,12 +11,13 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 import click
-from datetime import datetime
 
 db = SQLAlchemy()
 
 
 class UserAssignment(db.Model):
+    """User-Assignment association table"""
+
     __tablename__ = "user_assignment"
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True)
     assignment_id = db.Column(
@@ -29,6 +31,8 @@ class UserAssignment(db.Model):
 
 
 class User(db.Model, UserMixin):
+    """User table"""
+
     __tablename__ = "user"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -50,21 +54,27 @@ class User(db.Model, UserMixin):
 
     @hybrid_property
     def password(self):
+        """Password property to hide password hashing"""
         return self.password_hash
 
     @password.setter
     def password(self, new_password):
+        """Password setter to hide password hashing"""
         self.password_hash = generate_password_hash(new_password)
 
     def verify_password(self, password):
+        """Ensure hashed password in database matches given password"""
         return check_password_hash(self.password_hash, password)
 
     @property
     def is_admin(self):
+        """Mainly used for the Flask-Admin package"""
         return self.role == "Teacher"
 
 
 class Assignment(db.Model):
+    """Assignment table"""
+
     __tablename__ = "assignment"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -108,6 +118,7 @@ def init_database():
 
 
 def add_test_data_to_database():
+    """For testing purposes; Init the DB and populate with dummy data"""
     init_database()
 
     test_user = User(
@@ -208,20 +219,24 @@ def add_test_data_to_database():
 
 @click.command("init-db")
 def init_db_command():
+    """Register Flask command init-db"""
     init_database()
     click.echo("Initialized the database!")
 
 
 @click.command("populate-db")
 def populate_db_command():
+    """Register Flask command populate-db"""
     add_test_data_to_database()
     click.echo("Added test data to database")
 
 
 def register_init_db(app):
+    """Called by __init__ to register the init-db command"""
     db.init_app(app)
     app.cli.add_command(init_db_command)
 
 
 def register_populate_db(app):
+    """Called by __init__ to register the populate-db command"""
     app.cli.add_command(populate_db_command)

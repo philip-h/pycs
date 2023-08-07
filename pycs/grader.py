@@ -3,18 +3,16 @@ author: @philiph
 The heart and soul of the grader application.
 """
 
-from enum import Enum, auto
 from pathlib import Path
 import itertools
 import re
 import subprocess
-import sys
 import shutil
 
 
 def _read_file(file_path: Path) -> list[str]:
-    """"""
-    with open(file_path, mode="r") as f_in:
+    """Read data from given file_path and returns a list of lines"""
+    with open(file_path, mode="r", encoding="uft-8") as f_in:
         return f_in.read().splitlines()
 
 
@@ -134,6 +132,7 @@ def _grade_pytest(assignment_path: Path) -> tuple[int, str]:
             cwd=f"{assignment_dir}",
             capture_output=True,
             timeout=5,
+            check=False,
         )
     except subprocess.TimeoutExpired:
         return (
@@ -162,16 +161,18 @@ def grade_student(assignment_path: Path) -> tuple[int, str]:
     """
     file_contents = _read_file(assignment_path)
 
+    # Gather all of the comments and scores
     hc_score, hc_comments = _check_header_comments(file_contents)
     ipo_score, ipo_comments = _check_ipo(file_contents)
     var_score, var_comments = _check_variable_names(file_contents)
     pt_score, pt_comments = _grade_pytest(assignment_path)
 
+    # Calculate weighted score
     scores = [hc_score, ipo_score, var_score, pt_score]
     weights = [1, 1, 1, 4]
     weighted_score = sum(s * w for s, w in zip(scores, weights)) / sum(weights)
 
-    # Output comments
+    # Generate output comments
     comments_header = f"{' Grading Comments ':=^80}\n"
     variables_header = f"{' Grading Variable Names ':=^80}\n"
 
