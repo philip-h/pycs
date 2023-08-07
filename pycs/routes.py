@@ -20,9 +20,11 @@ import os
 from datetime import datetime
 import functools
 from http import HTTPStatus
+from pathlib import Path
 
 from .forms import RegisterForm, LoginForm, ChangePassForm, UploadCodeForm
 from .models import Assignment, User, UserAssignment, db
+from .grader import grade_student
 
 routes = Blueprint("routes", __name__)
 login_manager = LoginManager()
@@ -160,7 +162,6 @@ def index():
 @routes.route("/<int:id>/assignment", methods=["GET", "POST"])
 @login_required
 def assignment(id):
-    # assignment = db.get_or_404(Assignment, id)
     assignment, user_assignment = db.session.execute(
         db.select(Assignment, UserAssignment)
         .outerjoin(
@@ -183,8 +184,7 @@ def assignment(id):
     if form.validate_on_submit():
         # Make student directory if it dne
         student_dir = os.path.join(
-            current_app.config["UPLOAD_FOLDER"],
-            f"{current_user.student_number}"
+            current_app.config["UPLOAD_FOLDER"], f"{current_user.student_number}"
         )
         if not os.path.exists(student_dir):
             os.makedirs(student_dir)
@@ -197,17 +197,25 @@ def assignment(id):
                 f"{filename}",
             )
 
-            # Score the user's submission
-            # score = _calculate_score(upload_path)
-
-            score = 2
-            # Create the association
-            user_assignment = UserAssignment(score=score, uploaded_filepath=upload_path)
-            user_assignment.assignment = assignment
-            current_user.assignment_associations.append(user_assignment)
-
-            db.session.commit()
+            # Save the code in the upload path
             code_file.save(upload_path)
+
+            # Score the user's submission
+            score, comments = grade_student(Path(upload_path))
+
+            # Has the user already submitted? If so, we are just updating the score
+            if user_assignment is not None:
+                user_assignment.score = score
+                user_assignment.comments = comments
+                db.session.commit()
+            else:
+                # Create the association
+                user_assignment = UserAssignment(score=score, comments=comments)
+                user_assignment.assignment = assignment
+                current_user.assignment_associations.append(user_assignment)
+
+                db.session.commit()
+
             return redirect(request.url)
         else:
             form.code.errors.append(

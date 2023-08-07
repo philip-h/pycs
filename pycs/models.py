@@ -22,7 +22,7 @@ class UserAssignment(db.Model):
         db.Integer, db.ForeignKey("assignment.id"), primary_key=True
     )
     score = db.Column(db.Integer, nullable=False)
-    uploaded_filepath = db.Column(db.String, nullable=False)
+    comments = db.Column(db.String, nullable=False)
 
     user = db.relationship("User", back_populates="assignment_associations")
     assignment = db.relationship("Assignment", back_populates="user_associations")
@@ -128,6 +128,27 @@ def add_test_data_to_database():
         password="123test321",
     )
 
+    import os
+
+    try:
+        os.makedirs(
+            os.path.join(
+                current_app.config["UPLOAD_FOLDER"], f"{test_user.student_number}"
+            )
+        )
+        os.makedirs(
+            os.path.join(
+                current_app.config["UPLOAD_FOLDER"], f"{test_user2.student_number}"
+            )
+        )
+        os.makedirs(
+            os.path.join(
+                current_app.config["UPLOAD_FOLDER"], f"{test_user3.student_number}"
+            )
+        )
+    except FileExistsError:
+        pass
+
     hello_assignment = Assignment(
         unit=0,
         name="Hello World",
@@ -156,21 +177,21 @@ def add_test_data_to_database():
 
     test_user_hello_assignment = UserAssignment(
         score=3,
-        uploaded_filepath=f"{test_user.student_number}_{hello_assignment.required_filename}",
+        comments=f"Do better",
     )
     test_user.assignment_associations.append(test_user_hello_assignment)
     hello_assignment.user_associations.append(test_user_hello_assignment)
 
     test_user2_hello_assignment = UserAssignment(
         score=4,
-        uploaded_filepath=f"{test_user2.student_number}_{hello_assignment.required_filename}",
+        comments="Not bad!",
     )
     test_user2.assignment_associations.append(test_user2_hello_assignment)
     hello_assignment.user_associations.append(test_user2_hello_assignment)
 
     test_user_3_goobdye_assignment = UserAssignment(
         score=2,
-        uploaded_filepath=f"{test_user3.student_number}_{goodbye_assignment.required_filename}",
+        comments="Chump...",
     )
     test_user3.assignment_associations.append(test_user_3_goobdye_assignment)
     goodbye_assignment.user_associations.append(test_user_3_goobdye_assignment)

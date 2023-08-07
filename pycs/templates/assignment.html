@@ -28,11 +28,17 @@
 </div>
 
 <div class="container assignment-info">
-  {% if data%}
+  {% if data %}
   <h2 class="assignment-info__title">Grade: {{ data.score }} / {{ assignment.total_points }}</h2>
   {% else %}
   <h2 class="assignment-info__title">Not submitted yet!</h2>
   {% endif %}
   <p class="assignment-info__due">Due: {{ assignment.due_date.strftime("%a %b %-d, %Y @ %H:%M") }}</p>
+</div>
+
+<div class="container assignment-comments">
+  {% if data %}
+  <pre><code>{{ data.comments }}</code></pre>
+  {% endif %}
 </div>
 {% endblock %}
