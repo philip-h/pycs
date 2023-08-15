@@ -5,7 +5,7 @@ Flask-Admin configuration
 
 import os
 
-from flask import redirect, url_for, current_app
+from flask import Flask, redirect, url_for, current_app
 from flask_admin import Admin
 from flask_admin.menu import MenuLink
 from flask_admin.contrib.sqla import ModelView
@@ -13,7 +13,8 @@ from flask_login import current_user
 from flask_wtf.file import FileField
 from werkzeug.utils import secure_filename
 
-from .models import User, Assignment, UserAssignment, db
+from .models import User, Assignment, UserAssignment
+from .database import db_session
 
 
 class AdminMV(ModelView):
@@ -67,11 +68,11 @@ class AdminScoresMV(AdminMV):
     column_filters = ["user.first_name", "assignment.name"]
 
 
-def init_admin(app):
+def init_admin(app: Flask):
     """Used to register Flask-Admin with local Flask app context"""
     admin = Admin(app)
-    admin.add_view(AdminUserMV(User, db.session))
-    admin.add_view(AdminAssignmentMV(Assignment, db.session))
-    admin.add_view(AdminScoresMV(UserAssignment, db.session))
+    admin.add_view(AdminUserMV(User, db_session))
+    admin.add_view(AdminAssignmentMV(Assignment, db_session))
+    admin.add_view(AdminScoresMV(UserAssignment, db_session))
 
     admin.add_link(MenuLink(name="Pycs", url="/"))

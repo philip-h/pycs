@@ -12,7 +12,7 @@ import shutil
 
 def _read_file(file_path: Path) -> list[str]:
     """Read data from given file_path and returns a list of lines"""
-    with open(file_path, mode="r", encoding="uft-8") as f_in:
+    with open(file_path, mode="r", encoding="utf-8") as f_in:
         return f_in.read().splitlines()
 
 

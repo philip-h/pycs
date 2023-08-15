@@ -17,17 +17,17 @@ from flask import (
     request,
 )
 
-from flask_login import LoginManager, login_user, logout_user, current_user
+from flask_login import login_user, logout_user, current_user
 from sqlalchemy import exc
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 
 from .forms import RegisterForm, LoginForm, ChangePassForm, UploadCodeForm
-from .models import Assignment, User, UserAssignment, db
+from .models import Assignment, User, UserAssignment
+from .database import db_session, select
 from .grader import grade_student
 
 routes = Blueprint("routes", __name__)
-login_manager = LoginManager()
 
 
 ###############################################################################
@@ -59,9 +59,9 @@ def register():
             first_name=form.first_name.data,
             password=form.password.data,
         )
-        db.session.add(new_user)
+        db_session.add(new_user)
         try:
-            db.session.commit()
+            db_session.commit()
         except exc.IntegrityError:
             form.student_number.errors.append(
                 f"Student {form.student_number.data} is already registered."
@@ -80,9 +80,9 @@ def login():
     if form.validate_on_submit():
         remember = bool(form.data.get("remember"))
 
-        user = db.session.execute(
-            db.select(User).filter_by(student_number=form.student_number.data)
-        ).scalar_one_or_none()
+        user = db_session.scalar(
+            select(User).where(User.student_number == form.student_number.data)
+        )
 
         if user is None or not user.verify_password(form.password.data):
             form.student_number.errors.append("Invalid Credentials.")
@@ -91,29 +91,6 @@ def login():
             return redirect(url_for(".index"))
 
     return render_template("login.html", form=form)
-
-
-@routes.route("/changepass", methods=["GET", "POST"])
-@login_required
-def change_pass():
-    """Handles the changing of a user's password."""
-    form = ChangePassForm()
-    if form.validate_on_submit():
-        # Verify current password
-        if not current_user.verify_password(form.current_pass.data):
-            form.current_pass.errors.append(
-                "Current password does not match password in database."
-            )
-        elif current_user.verify_password(form.new_pass.data):
-            form.new_pass.errors.append(
-                "New password cannot mactch password in database."
-            )
-        else:
-            current_user.password = form.new_pass.data
-            db.session.commit()
-            return redirect(url_for(".index"))
-
-    return render_template("changepass.html", form=form)
 
 
 @routes.get("/logout")
@@ -142,13 +119,14 @@ def index():
     # Query database to get all assignments, with optional UserAssignment join
     # If the currently logged in user has submitted an assignment.
     # This is to eventually get the score out into the template
-    assignments_scores = db.session.execute(
-        db.select(Assignment, UserAssignment).outerjoin(
+    assignments_scores = db_session.execute(
+        select(Assignment, UserAssignment).outerjoin(
             UserAssignment,
-            (Assignment.id == UserAssignment.assignment_id)
-            & (UserAssignment.user_id == current_user.id),
+            (UserAssignment.assignment_id == Assignment.id) & UserAssignment.user_id
+            == current_user.id,
         )
     )
+
     assignments_scores = list(assignments_scores)
     # Calculate studen't average
     scores, totals = 0, 0
@@ -172,14 +150,14 @@ def index():
 def assignment(id):
     """Shows the grade and comments of an assignment.
     Every assignment page gives the user the ability to (Re)Upload an assignment"""
-    assignment, user_assignment = db.session.execute(
-        db.select(Assignment, UserAssignment)
+    assignment, user_assignment = db_session.execute(
+        select(Assignment, UserAssignment)
         .outerjoin(
             UserAssignment,
             (UserAssignment.assignment_id == id)
             & (UserAssignment.user_id == current_user.id),
         )
-        .filter(Assignment.id == id)
+        .where(Assignment.id == id)
     ).first()
 
     # SQLite only really does incremental primary keys.
@@ -217,21 +195,44 @@ def assignment(id):
             if user_assignment is not None:
                 user_assignment.score = score
                 user_assignment.comments = comments
-                db.session.commit()
+                db_session.commit()
             else:
                 # Create the association
                 user_assignment = UserAssignment(score=score, comments=comments)
-                user_assignment.assignment = assignment
                 current_user.assignment_associations.append(user_assignment)
+                assignment.user_associations.append(user_assignment)
 
-                db.session.commit()
+                db_session.commit()
 
             return redirect(request.url)
         else:
             form.code.errors.append(
-                f"Uploaded file must be named {assignment.required_filename}."
+                f"Uploaded file must be named {assignment.required_filename}. {filename}"
             )
 
     return render_template(
         "assignment.html", assignment=assignment, data=user_assignment, form=form
     )
+
+
+@routes.route("/changepass", methods=["GET", "POST"])
+@login_required
+def change_pass():
+    """Handles the changing of a user's password."""
+    form = ChangePassForm()
+    if form.validate_on_submit():
+        # Verify current password
+        if not current_user.verify_password(form.current_pass.data):
+            form.current_pass.errors.append(
+                "Current password does not match password in database."
+            )
+        elif current_user.verify_password(form.new_pass.data):
+            form.new_pass.errors.append(
+                "New password cannot mactch password in database."
+            )
+        else:
+            current_user.password = form.new_pass.data
+            db_session.commit()
+            return redirect(url_for(".index"))
+
+    return render_template("changepass.html", form=form)

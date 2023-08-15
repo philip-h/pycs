@@ -4,7 +4,6 @@ version = "1.0.0"
 description = "Python code checker / grader"
 dependencies = [
     "flask",
-    "flask_sqlalchemy",
     "flask_login",
     "flask_wtf"
 ]

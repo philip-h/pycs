@@ -6,19 +6,22 @@ Flask application factory
 import os
 
 from flask import Flask, render_template
+from .commands import *
 
 
 def create_app(test_config=None):
     """Create and configure the Flask app"""
     app = Flask(__name__, instance_relative_config=True)
+    # Default configuration for development
     app.config.from_mapping(
-        SECRET_KEY="dev",  # TODO: Change this
-        SQLALCHEMY_DATABASE_URI="sqlite:///pycs.db",
+        SECRET_KEY="dev",
         UPLOAD_FOLDER=os.path.join(app.instance_path, "code"),
     )
 
+    # Override configuration for testing
     if test_config is None:
         app.config.from_pyfile("config.py", silent=True)
+    # Override configuration for production
     else:
         app.config.from_mapping(test_config)
 
@@ -27,56 +30,54 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except FileExistsError:
         print("Instance path already exists :)")
-    except OSError as os_error:
-        print("Instance path could not be created", os_error)
 
     # Make sure uploads folder exists!
     try:
         os.makedirs(os.path.join(app.instance_path, app.config["UPLOAD_FOLDER"]))
     except FileExistsError:
         print("Uploads folder already exists :)")
-    except OSError as os_error:
-        print("Uploads folder could not be created", os_error)
 
     # Make sure pytest folder exists!
     try:
-        os.makedirs(os.path.join(app.instance_path, app.config["UPLOAD_FOLDER"], "tests"))
+        os.makedirs(
+            os.path.join(app.instance_path, app.config["UPLOAD_FOLDER"], "tests")
+        )
     except FileExistsError:
         print("Tests folder already exists :)")
-    except OSError as os_error:
-        print("Tests folder could not be created", os_error)
 
-    # Setup database
-    from . import models
+    # Register click commands
+    app.cli.add_command(command_init_db)
+    app.cli.add_command(command_create_admin)
 
-    models.register_init_db(app)
-    models.register_populate_db(app)
     # Setup login manager
-    from .routes import login_manager
+    from .login import init_login_manager
 
-    login_manager.init_app(app)
+    init_login_manager(app)
 
-    @login_manager.user_loader
-    def load_user(user_id):
-        from .models import User
-
-        return models.db.session.execute(
-            models.db.select(User).filter_by(id=user_id)
-        ).scalar_one()
-
+    # Initialize routes blueprint
     from .routes import routes
 
     app.register_blueprint(routes)
 
     # Admin Panel
-    from . import admin
+    from .admin import init_admin
 
-    admin.init_admin(app)
+    init_admin(app)
 
     @app.get("/hello")
     def hello():
         """Test route"""
         return "Yell Banana!"
+
+    ###############################################################################
+    # Database shutdown
+    ###############################################################################
+    from .database import db_session
+
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        db_session.remove()
+
 
     ###############################################################################
     # Error Handling
