@@ -69,6 +69,7 @@ def test_cannot_access_invisible_assignment(client, auth):
     auth.login()
     assert client.get("/2/assignment").status_code == 404
 
+
 def test_post_assignment_logged_in(client, auth, monkeypatch, app):
     """Uploaded assignment creates assignment association in sqlalchemy and displays grader comment"""
     monkeypatch.setattr("pycs.routes.grade_student", lambda _: (4, "nice"))
@@ -80,7 +81,7 @@ def test_post_assignment_logged_in(client, auth, monkeypatch, app):
 
     auth.login()
     res = client.post("/1/assignment", data=upload_data)
-    assert res.status_code == 302 # Successful upload
+    assert res.status_code == 302  # Successful upload
     res = client.get("/1/assignment")
     assert b"nice" in res.data
     user = db_session.scalar(select(User))

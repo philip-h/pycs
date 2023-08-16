@@ -12,8 +12,11 @@ import shutil
 
 def _read_file(file_path: Path) -> list[str]:
     """Read data from given file_path and returns a list of lines"""
-    with open(file_path, mode="r", encoding="utf-8") as f_in:
-        return f_in.read().splitlines()
+    try:
+        with open(file_path, mode="r", encoding="utf-8") as f_in:
+            return f_in.read().splitlines()
+    except FileNotFoundError:
+        return None
 
 
 def _check_header_comments(file_contents: list[str]) -> tuple[int, str]:
@@ -50,8 +53,6 @@ def _check_header_comments(file_contents: list[str]) -> tuple[int, str]:
 
     # Ensure docstring is closed
     if file_contents[0] == '"""' and not file_contents[4] == '"""':
-        return 2, "Header comments not closed! Any feedback after this is useless!\n"
-    if file_contents[0] == "'''" and not file_contents[4] == "'''":
         return 2, "Header comments not closed! Any feedback after this is useless!\n"
 
     # Good header comments
@@ -117,15 +118,8 @@ def _check_ipo(file_contents: list[str]) -> tuple[int, str]:
     return 4, "IPO comments are good\n"
 
 
-def _grade_pytest(assignment_path: Path) -> tuple[int, str]:
-    """Grade a student based off of the number of pytest tests they pass
-    Returns achieved level and comments.
-    """
-    assignment_dir = assignment_path.parent
-    assignment_name = assignment_path.name
-    test_path = assignment_dir.parent / "tests" / f"test_{assignment_name}"
-    shutil.copy2(test_path, assignment_dir)
-
+def _run_pytest(test_path: Path, assignment_dir: Path) -> str | None:
+    """Run the pytest application with a given test_*.py file and a given assignment directory"""
     try:
         process = subprocess.run(
             ["pytest", "--no-header", "-v", f"{test_path.name}"],
@@ -135,24 +129,40 @@ def _grade_pytest(assignment_path: Path) -> tuple[int, str]:
             check=False,
         )
     except subprocess.TimeoutExpired:
+        return None
+
+    return process.stdout.decode()
+
+
+def _grade_pytest(assignment_path: Path) -> tuple[int, str]:
+    """Grade a student based off of the number of pytest tests they pass
+    Returns achieved level and comments.
+    """
+    # Move pytest file to student's assignment directory
+    assignment_dir = assignment_path.parent
+    assignment_name = assignment_path.name
+    test_path = assignment_dir.parent / "tests" / f"test_{assignment_name}"
+    shutil.copy2(test_path, assignment_dir)
+
+    # Run the pytest
+    pytest_output = _run_pytest(test_path, assignment_dir)
+    if pytest_output is None:
         return (
             1,
             "\n\nYour code has some kind of infinite loop. Either that or your program is waiting for input that my grader won't give it!",
         )
 
-    pytest_output = process.stdout.decode()
-
     # Calculate their grade based off of how many tests they passed or failed
     pytest_output_lines = pytest_output.splitlines()
     test_lines = [
-        line for line in pytest_output_lines if re.search("\[\s?\d+%\]", line)
+        line for line in pytest_output_lines if re.search("[\s*\d+%]", line)
     ]
     num_failed = sum("FAILED" in line for line in test_lines)
     num_passed = sum("PASSED" in line for line in test_lines)
     # Score is a number between 0 and 1
     score = num_passed / (num_passed + num_failed)
 
-    return score * 4, pytest_output
+    return round(score * 4, 1), pytest_output
 
 
 def grade_student(assignment_path: Path) -> tuple[int, str]:
@@ -160,6 +170,8 @@ def grade_student(assignment_path: Path) -> tuple[int, str]:
     Returns the achieved level and comments
     """
     file_contents = _read_file(assignment_path)
+    if file_contents is None:
+        return 0, "File could not be read... try re-uploading or telling Mr. Habib"
 
     # Gather all of the comments and scores
     hc_score, hc_comments = _check_header_comments(file_contents)

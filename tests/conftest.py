@@ -31,7 +31,9 @@ def app():
         visible=True,
     )
 
-    db_session.add_all([new_user, new_assignment, invisible_assignment, second_assignment])
+    db_session.add_all(
+        [new_user, new_assignment, invisible_assignment, second_assignment]
+    )
     db_session.commit()
     yield app
     clear_db()
