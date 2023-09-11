@@ -10,7 +10,7 @@ import subprocess
 import shutil
 
 
-def _read_file(file_path: Path) -> list[str]:
+def _read_file(file_path: Path) -> list[str] | None:
     """Read data from given file_path and returns a list of lines"""
     try:
         with open(file_path, mode="r", encoding="utf-8") as f_in:
