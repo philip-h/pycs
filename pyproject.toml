@@ -5,7 +5,10 @@ description = "Python code checker / grader"
 dependencies = [
     "flask",
     "flask_login",
-    "flask_wtf"
+    "flask_wtf",
+    "flask_admin",
+    "sqlalchemy",
+    "waitress",
 ]
 
 [build-system]
