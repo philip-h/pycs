@@ -13,7 +13,7 @@
               <a class="ass__name__link {{ 'ass__name__link--overdue' if a.due_date < today }}" href="{{ url_for('.assignment', id=a.id) }}">{{ a.name }}</a>
             </div>
             <div class="ass__description">A basic hello world script.</div>
-            <div class="ass__due">Due: {{ a.due_date.strftime("%a %b %-d, %Y @ %H:%M") }}</div>
+            <div class="ass__due">Due: {{ a.due_date.strftime("%a %b %d, %Y @ %H:%M") }}</div>
           </div>
           <div>
             {% if ua %}
