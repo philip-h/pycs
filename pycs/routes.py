@@ -18,7 +18,7 @@ from flask import (
 )
 
 from flask_login import login_user, logout_user, current_user
-from sqlalchemy import exc
+from sqlalchemy import exc, text
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 
@@ -122,8 +122,8 @@ def index():
     assignments_scores = db_session.execute(
         select(Assignment, UserAssignment).outerjoin(
             UserAssignment,
-            (UserAssignment.assignment_id == Assignment.id) & UserAssignment.user_id
-            == current_user.id,
+            (UserAssignment.assignment_id == Assignment.id)
+            & (UserAssignment.user_id == current_user.id),
         )
     )
 
@@ -154,7 +154,7 @@ def assignment(id):
         select(Assignment, UserAssignment)
         .outerjoin(
             UserAssignment,
-            (UserAssignment.assignment_id == id)
+            (UserAssignment.assignment_id == Assignment.id)
             & (UserAssignment.user_id == current_user.id),
         )
         .where(Assignment.id == id)

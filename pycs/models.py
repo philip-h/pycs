@@ -34,6 +34,10 @@ class UserAssignment(Base):
     user: Mapped["User"] = relationship(back_populates="assignment_associations")
     assignment: Mapped["Assignment"] = relationship(back_populates="user_associations")
 
+    def __repr__(self):
+        return f"<UserAssignment {self.user_id=} {self.assignment_id=}>"
+
+
 
 class User(Base, UserMixin):
     """User table"""
