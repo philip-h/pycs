@@ -8,7 +8,7 @@ dependencies = [
     "flask_wtf",
     "flask_admin",
     "sqlalchemy",
-    "waitress",
+    "gunicorn",
 ]
 
 [build-system]
