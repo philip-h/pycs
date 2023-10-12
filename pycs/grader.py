@@ -154,13 +154,18 @@ def _grade_pytest(assignment_path: Path) -> tuple[int, str]:
 
     # Calculate their grade based off of how many tests they passed or failed
     pytest_output_lines = pytest_output.splitlines()
-    test_lines = [
-        line for line in pytest_output_lines if re.search("[\s*\d+%]", line)
-    ]
+    test_lines = [line for line in pytest_output_lines if re.search("[\s*\d+%]", line)]
     num_failed = sum("FAILED" in line for line in test_lines)
     num_passed = sum("PASSED" in line for line in test_lines)
     # Score is a number between 0 and 1
-    score = num_passed / (num_passed + num_failed)
+    try:
+        score = num_passed / (num_passed + num_failed)
+    except ZeroDivisionError:
+        # Happens if pytest fails to run due to code that does not compile
+        return (
+            1,
+            "\n\nTwo possible problems. 1) Your code does not run (try running it in VS Code. If it doesn't run there, it won't run on pycs.) 2) We are in a functions unit and you didn't name your functions correctly. Please double check your function names. 3) You added your functions INSIDE of the main function. `def <func_name>` needs to be at the very left of the screen.",
+        )
 
     return round(score * 4, 1), pytest_output
 
