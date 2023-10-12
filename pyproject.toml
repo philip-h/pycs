@@ -3,11 +3,11 @@ name = "pycs"
 version = "1.0.0"
 description = "Python code checker / grader"
 dependencies = [
-    "flask",
-    "flask_login",
-    "flask_wtf",
-    "flask_admin",
-    "sqlalchemy",
+    "flask==2.2.3",
+    "flask_login==0.6.2",
+    "flask_wtf==1.1.1",
+    "flask_admin==1.6.1",
+    "sqlalchemy==2.0.20",
     "gunicorn",
 ]
 
