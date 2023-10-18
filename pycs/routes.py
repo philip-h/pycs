@@ -112,7 +112,8 @@ def index():
     # If the currently logged in user has submitted an assignment.
     # This is to eventually get the score out into the template
     assignments_scores = db_session.execute(
-        select(Assignment, UserAssignment).outerjoin(
+        select(Assignment, UserAssignment)
+        .outerjoin(
             UserAssignment,
             (UserAssignment.assignment_id == Assignment.id)
             & (UserAssignment.user_id == current_user.id),
@@ -121,6 +122,31 @@ def index():
     )
 
     assignments_scores = list(assignments_scores)
+
+    assignments = {}
+    for a, ua in assignments_scores:
+        if a.unit_name not in assignments:
+            assignments[a.unit_name] = []
+
+        if ua is None:
+            if a.due_date < datetime.today():
+                score = 0
+            else:
+                score = None
+        else:
+            score = ua.score
+
+        # Don't send invisible assignments to the client
+        if a.visible:
+            assignments[a.unit_name].append(
+                {
+                    "id": a.id,
+                    "name": a.name,
+                    "due_date": a.due_date,
+                    "score": score,
+                    "total": a.total_points,
+                }
+            )
     # Calculate studen't average
     # Don't include missing assignments in the grade calculation
     # ONLY IF we are not past the due date
@@ -139,7 +165,7 @@ def index():
         avg = round((scores / totals) * 100, 2)
 
     return render_template(
-        "app.html", assignments_scores=assignments_scores, avg=avg, today=datetime.now()
+        "app.html", assignments_by_unit=assignments, avg=avg, today=datetime.now()
     )
 
 

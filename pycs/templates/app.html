@@ -5,27 +5,29 @@
 {% block content %}
 <div class="container">
     <h2 class="current-avg">{{ avg }}%</h2>
+    {% for unit, assignments in assignments_by_unit.items() %}
+    <h1 class="unit-name">{{ unit }}</h1>
     <div class="container--surface ass-list">
-    {% for a, ua in assignments_scores if a.visible %}
-        <h1>{{ a.unit_name }}</h1>
+        {% for a in assignments %}
         <div class="ass-list__ass">
-          <div class="">
-            <div class="ass__name">
-              <a class="ass__name__link {{ 'ass__name__link--overdue' if a.due_date < today }}" href="{{ url_for('.assignment', id=a.id) }}">{{ a.name }}</a>
+            <div class="">
+                <div class="ass__name">
+                    <a class="ass__name__link {{ 'ass__name__link--overdue' if a.due_date < today }}" href="{{ url_for('.assignment', id=a.id) }}">{{ a.name }}</a>
+                </div>
+                <div class="ass__due">Due: {{ a.due_date.strftime("%a %b %d, %Y @ %H:%M") }}</div>
             </div>
-            <div class="ass__due">Due: {{ a.due_date.strftime("%a %b %d, %Y @ %H:%M") }}</div>
-          </div>
-          <div>
-            {% if ua %}
-              <span class="ass__score">{{ ua.score }}</span>
-            {% endif %}
-            <span> / {{ a.total_points }}</span>
-          </div>
+            <div>
+                {% if a.score %}
+                <span class="ass__score">{{ a.score }}</span>
+                {% endif %}
+                <span> / {{ a.total }}</span>
+            </div>
         </div>
         {% if not loop.last %}
-          <hr class="surface-divider">
+        <hr class="surface-divider">
         {% endif %}
-    {% endfor %}
+        {% endfor %}
     </div>
+    {% endfor %}
 </div>
 {% endblock %}
