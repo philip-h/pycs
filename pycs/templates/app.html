@@ -17,7 +17,7 @@
                 <div class="ass__due">Due: {{ a.due_date.strftime("%a %b %d, %Y @ %H:%M") }}</div>
             </div>
             <div>
-                {% if a.score %}
+                {% if a.score is not none %}
                 <span class="ass__score">{{ a.score }}</span>
                 {% endif %}
                 <span> / {{ a.total }}</span>
