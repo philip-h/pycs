@@ -34,6 +34,8 @@ def _check_header_comments(file_contents: list[str]) -> tuple[int, str]:
     file_contents = file_contents[::]
     list(itertools.dropwhile(lambda line: line.strip() == "", file_contents))
 
+    if not file_contents:
+        return 0, "Your file is blank... double check WHICh file you've uploaded"
     # Ensure docstring by checking the first line
     if not file_contents[0] == '"""' and not file_contents[0] == "'''":
         return 0, "Docstrings are missing.\n"
