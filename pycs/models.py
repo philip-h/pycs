@@ -96,6 +96,7 @@ class Assignment(Base):
     required_filename: Mapped[str]
     due_date: Mapped[datetime]
     visible: Mapped[bool]
+    unit_name: Mapped[str] = mapped_column(default="Unit 0: Intro to programming")
 
     user_associations: Mapped[list["UserAssignment"]] = relationship(
         back_populates="assignment"

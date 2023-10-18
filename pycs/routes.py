@@ -2,30 +2,22 @@
 author: @philiph
 All Pycs application routes.
 """
-import os
 from datetime import datetime
 import functools
 from http import HTTPStatus
+import os
 from pathlib import Path
 
-from flask import (
-    Blueprint,
-    redirect,
-    render_template,
-    url_for,
-    current_app,
-    request,
-)
-
-from flask_login import login_user, logout_user, current_user
-from sqlalchemy import exc, text
+from flask import Blueprint, current_app, redirect, render_template, request, url_for
+from flask_login import current_user, login_user, logout_user
+from sqlalchemy import desc, exc, text
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 
-from .forms import RegisterForm, LoginForm, ChangePassForm, UploadCodeForm
-from .models import Assignment, User, UserAssignment
 from .database import db_session, select
+from .forms import ChangePassForm, LoginForm, RegisterForm, UploadCodeForm
 from .grader import grade_student
+from .models import Assignment, User, UserAssignment
 
 routes = Blueprint("routes", __name__)
 
@@ -125,14 +117,20 @@ def index():
             (UserAssignment.assignment_id == Assignment.id)
             & (UserAssignment.user_id == current_user.id),
         )
+        .order_by(desc(Assignment.id))
     )
 
     assignments_scores = list(assignments_scores)
     # Calculate studen't average
+    # Don't include missing assignments in the grade calculation
+    # ONLY IF we are not past the due date
     scores, totals = 0, 0
     for a, ua in assignments_scores:
         if ua:
             scores += ua.score
+            totals += a.total_points
+        elif a.due_date < datetime.today():
+            scores += 0
             totals += a.total_points
 
     if totals == 0:
