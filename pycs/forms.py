@@ -75,5 +75,5 @@ class ChangePassForm(FlaskForm):
 class UploadCodeForm(FlaskForm):
     """Upload code Form"""
     code = FileField(
-        validators=[FileRequired(), FileAllowed(["py"], "Python code only")]
+        validators=[FileRequired(), FileAllowed(["py", "java"], "Python code (or java code) only")]
     )

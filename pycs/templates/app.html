@@ -12,7 +12,7 @@
         <div class="ass-list__ass">
             <div class="">
                 <div class="ass__name">
-                    <a class="ass__name__link {{ 'ass__name__link--overdue' if a.due_date < today }}" href="{{ url_for('.assignment', id=a.id) }}">{{ a.name }}</a>
+                    <a class="ass__name__link {{ 'ass__name__link--overdue' if a.due_date < today }}" href="{{ url_for('.assignment', class_id=a.class_id, a_id=a.id) }}">{{ a.name }}</a>
                 </div>
                 <div class="ass__due">Due: {{ a.due_date.strftime("%a %b %d, %Y @ %H:%M") }}</div>
             </div>

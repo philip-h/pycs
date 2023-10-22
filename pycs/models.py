@@ -4,16 +4,16 @@ Database models for Pycs using Flask-SQLAlchemy
 """
 
 from datetime import datetime
+
+from flask_login import UserMixin
+from sqlalchemy import Column, ForeignKey, String, Table
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
-from flask_login import UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash
-
-from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 class Base(DeclarativeBase):
@@ -38,6 +38,12 @@ class UserAssignment(Base):
         return f"<UserAssignment {self.user_id=} {self.assignment_id=}>"
 
 
+user_classroom = Table(
+    "user_classroom",
+    Base.metadata,
+    Column("user_id", ForeignKey("user.id"), primary_key=True),
+    Column("classroom_id", ForeignKey("classroom.id"), primary_key=True),
+)
 
 class User(Base, UserMixin):
     """User table"""
@@ -54,6 +60,10 @@ class User(Base, UserMixin):
     )
     assignments: Mapped[list["Assignment"]] = association_proxy(
         "assignment_associations", "assignment"
+    )
+
+    classes: Mapped[list["Classroom"]] = relationship(
+        secondary=user_classroom, back_populates="users"
     )
 
     def __init__(self, student_number, first_name, password, role="Student"):
@@ -97,6 +107,7 @@ class Assignment(Base):
     due_date: Mapped[datetime]
     visible: Mapped[bool]
     unit_name: Mapped[str] = mapped_column(default="Unit 0: Intro to programming")
+    class_id: Mapped[int]
 
     user_associations: Mapped[list["UserAssignment"]] = relationship(
         back_populates="assignment"
@@ -108,3 +119,16 @@ class Assignment(Base):
 
     def verify_filename(self, filename):
         return filename == self.required_filename
+
+class Classroom(Base):
+    """Classroom table"""
+
+    __tablename__ = "classroom"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    course_code: Mapped[str]
+    year: Mapped[int]
+    sem: Mapped[int]
+    teacher_id: Mapped[int]
+    users: Mapped[list["User"]] = relationship(
+        secondary=user_classroom, back_populates="classes"
+    )

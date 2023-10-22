@@ -96,9 +96,20 @@ def logout():
 # Application Routes
 ###############################################################################
 
-
 @routes.get("/")
 def index():
+    """The main page of the application"""
+
+    # Authentication required for this route!
+    # Stated explicitly here because @login_required always
+    # redirects to index
+    if not current_user.is_authenticated:
+        return render_template("landing.html")
+
+    return render_template("classes.html", classes=current_user.classes)
+
+@routes.get("/<int:class_id>/app")
+def app_index(class_id):
     """The main page of the application.
     If the user is logged out, show a landing page, otherwise show a list of assignments.
     """
@@ -116,8 +127,9 @@ def index():
         .outerjoin(
             UserAssignment,
             (UserAssignment.assignment_id == Assignment.id)
-            & (UserAssignment.user_id == current_user.id),
+            & (UserAssignment.user_id == current_user.id)
         )
+        .where(Assignment.class_id == class_id)
         .order_by(desc(Assignment.id))
     )
 
@@ -145,6 +157,7 @@ def index():
                     "due_date": a.due_date,
                     "score": score,
                     "total": a.total_points,
+                    "class_id": a.class_id,
                 }
             )
     # Calculate studen't average
@@ -169,9 +182,9 @@ def index():
     )
 
 
-@routes.route("/<int:id>/assignment", methods=["GET", "POST"])
+@routes.route("/<int:class_id>/app/<int:a_id>/assignment", methods=["GET", "POST"])
 @login_required
-def assignment(id):
+def assignment(class_id, a_id):
     """Shows the grade and comments of an assignment.
     Every assignment page gives the user the ability to (Re)Upload an assignment"""
     assignment, user_assignment = db_session.execute(
@@ -181,7 +194,8 @@ def assignment(id):
             (UserAssignment.assignment_id == Assignment.id)
             & (UserAssignment.user_id == current_user.id),
         )
-        .where(Assignment.id == id)
+        .where(Assignment.class_id == class_id)
+        .where(Assignment.id == a_id)
     ).first()
 
     # SQLite only really does incremental primary keys.
@@ -213,7 +227,10 @@ def assignment(id):
             code_file.save(upload_path)
 
             # Score the user's submission
-            score, comments = grade_student(Path(upload_path))
+            if class_id == 2:
+                score, comments = 2, "Thanks for submitting :D"
+            else:
+                score, comments = grade_student(Path(upload_path))
 
             # Has the user already submitted? If so, we are just updating the score
             if user_assignment is not None:
