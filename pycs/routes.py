@@ -96,6 +96,7 @@ def logout():
 # Application Routes
 ###############################################################################
 
+
 @routes.get("/")
 def index():
     """The main page of the application"""
@@ -107,6 +108,7 @@ def index():
         return render_template("landing.html")
 
     return render_template("classes.html", classes=current_user.classes)
+
 
 @routes.get("/<int:class_id>/app")
 def app_index(class_id):
@@ -127,7 +129,7 @@ def app_index(class_id):
         .outerjoin(
             UserAssignment,
             (UserAssignment.assignment_id == Assignment.id)
-            & (UserAssignment.user_id == current_user.id)
+            & (UserAssignment.user_id == current_user.id),
         )
         .where(Assignment.class_id == class_id)
         .order_by(desc(Assignment.id))
@@ -163,19 +165,21 @@ def app_index(class_id):
     # Calculate studen't average
     # Don't include missing assignments in the grade calculation
     # ONLY IF we are not past the due date
-    scores, totals = 0, 0
+    marks, weights = [], []
     for a, ua in assignments_scores:
         if ua:
-            scores += ua.score
-            totals += a.total_points
+            marks.append(ua.score / a.total_points)
+            weights.append(a.weight)
         elif a.due_date < datetime.today():
-            scores += 0
-            totals += a.total_points
+            marks.append(0)
+            weights.append(a.weight)
 
-    if totals == 0:
+    if len(marks) == 0:
         avg = "0"
     else:
-        avg = round((scores / totals) * 100, 2)
+        avg = round(
+            (sum(m * w for m, w in zip(marks, weights)) / sum(weights)) * 100, 2
+        )
 
     return render_template(
         "app.html", assignments_by_unit=assignments, avg=avg, today=datetime.now()

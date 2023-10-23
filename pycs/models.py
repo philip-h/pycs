@@ -107,6 +107,7 @@ class Assignment(Base):
     due_date: Mapped[datetime]
     visible: Mapped[bool]
     unit_name: Mapped[str] = mapped_column(default="Unit 0: Intro to programming")
+    weight: Mapped[int]
     class_id: Mapped[int]
 
     user_associations: Mapped[list["UserAssignment"]] = relationship(
