@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from pycs.grader import (
-    _read_file,
+    read_code,
     _check_header_comments,
     _check_variable_names,
     _check_ipo,
@@ -15,14 +15,14 @@ resources = Path(__file__).parent / "resources"
 
 def test__read_file():
     """Read file should return list[str] of each line in the file"""
-    actual = _read_file(resources / "lines.txt")
+    actual = read_code(resources / "lines.txt")
     expected = ["1", "2", "3"]
     assert actual == expected
 
 
 def test__read_file_fne():
     """Files not found should return None"""
-    actual = _read_file(resources / "doesnotexist.txt")
+    actual = read_code(resources / "doesnotexist.txt")
     assert actual is None
 
 

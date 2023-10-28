@@ -13,7 +13,7 @@ from flask_login import current_user
 from flask_wtf.file import FileField
 from werkzeug.utils import secure_filename
 
-from .models import User, Assignment, UserAssignment
+from .models import User, Assignment, UserAssignment, Classroom
 from .database import db_session
 
 
@@ -74,5 +74,6 @@ def init_admin(app: Flask):
     admin.add_view(AdminUserMV(User, db_session))
     admin.add_view(AdminAssignmentMV(Assignment, db_session))
     admin.add_view(AdminScoresMV(UserAssignment, db_session))
+    admin.add_view(ModelView(Classroom, db_session))
 
     admin.add_link(MenuLink(name="Pycs", url="/"))

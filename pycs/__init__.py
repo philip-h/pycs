@@ -43,7 +43,15 @@ def create_app(test_config=None):
             os.path.join(app.instance_path, app.config["UPLOAD_FOLDER"], "tests")
         )
     except FileExistsError:
-        print("Tests folder already exists :)")
+        print("Python tests folder already exists :)")
+
+    # Make sure junit test folder exists!
+    try:
+        os.makedirs(
+            os.path.join(app.instance_path, app.config["UPLOAD_FOLDER"], "java-tests")
+        )
+    except FileExistsError:
+        print("Java tests folder already exists :)")
 
     # Register click commands
     app.cli.add_command(command_init_db)

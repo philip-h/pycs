@@ -16,7 +16,7 @@ from werkzeug.utils import secure_filename
 
 from .database import db_session, select
 from .forms import ChangePassForm, LoginForm, RegisterForm, UploadCodeForm
-from .grader import grade_student
+from .grader import Grader
 from .models import Assignment, User, UserAssignment
 
 routes = Blueprint("routes", __name__)
@@ -231,10 +231,8 @@ def assignment(class_id, a_id):
             code_file.save(upload_path)
 
             # Score the user's submission
-            if class_id == 2:
-                score, comments = 2, "Thanks for submitting :D"
-            else:
-                score, comments = grade_student(Path(upload_path))
+            grader = Grader(class_id)
+            score, comments = grader.grade_student(Path(upload_path))
 
             # Has the user already submitted? If so, we are just updating the score
             if user_assignment is not None:
