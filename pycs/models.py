@@ -106,7 +106,7 @@ class Assignment(Base):
     required_filename: Mapped[str]
     due_date: Mapped[datetime]
     visible: Mapped[bool]
-    unit_name: Mapped[str] = mapped_column(default="Unit 0: Intro to programming")
+    unit_name: Mapped[str]
     weight: Mapped[int]
     class_id: Mapped[int]
 

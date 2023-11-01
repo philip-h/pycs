@@ -48,7 +48,7 @@ def create_app(test_config=None):
     # Make sure junit test folder exists!
     try:
         os.makedirs(
-            os.path.join(app.instance_path, app.config["UPLOAD_FOLDER"], "java-tests")
+            os.path.join(app.instance_path, app.config["UPLOAD_FOLDER"], "tests-java")
         )
     except FileExistsError:
         print("Java tests folder already exists :)")

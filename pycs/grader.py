@@ -9,8 +9,6 @@ import re
 import subprocess
 import shutil
 
-from _pytest._code import code
-
 
 def read_code(file_path: Path) -> list[str] | None:
     """Read data from given file_path and returns a list of lines"""
@@ -153,7 +151,7 @@ class ICS3U(CodingClass):
         """Run the pytest application with a given test_*.py file and a given assignment directory"""
         try:
             process = subprocess.run(
-                ["pytest", "--no-header", "-v", f"{test_path.name}"],
+                ["pytest", "--no-header", "-v", "--tb=short", f"{test_path.name}"],
                 cwd=f"{assignment_dir}",
                 capture_output=True,
                 timeout=5,
@@ -263,17 +261,17 @@ class ICS4U(CodingClass):
 
         # Checking class conventions for docstring
         comment = ""
-        if not re.match(r" \* author: [a-zA-Z]+", file_contents[1]):
+        if not re.match(r" ?\* @?author:? [a-zA-Z]+", file_contents[1]):
             comment += "Missing author (or wrong format) in docstring\n"
-        if not re.match(r" \* date: \d\d/\d\d/\d\d\d\d", file_contents[2]):
+        if not re.match(r" ?\* @?date:? \d\d/\d\d/\d\d\d\d", file_contents[2]):
             comment += "Missing date (or wrong format) in docstring\n"
-        if not re.match(r" \* \w+", file_contents[3]):
+        if not re.match(r" ?\* \w+", file_contents[3]):
             comment += "Missing one sentence description of module in docstring\n"
         if comment != "":
             return 2, comment
 
         # Ensure docstring is closed
-        if file_contents[0] == "/**" and not file_contents[4] == " */":
+        if file_contents[0] == "/**" and not "*/" in file_contents[4].replace(" ", ""):
             return (
                 2,
                 "Header comments not closed! Any feedback after this is useless!\n",
@@ -376,7 +374,7 @@ class ICS4U(CodingClass):
 
     def _run_junit(
         self, assignment_dir: Path, assignment_file: str, test_file: str
-    ) -> str | None:
+    ) -> tuple[bool, str]:
         """Run the junit jar file with a given Test*.java file and a given assignment directory"""
         try:
             process = subprocess.run(
@@ -397,11 +395,10 @@ class ICS4U(CodingClass):
                 check=False,
             )
         except subprocess.TimeoutExpired:
-            return None
+            return False, "I think you have an infinite loop in your code (OR infinite recursion!)"
 
         if process.returncode != 0:
-            print(process.stderr.decode())
-            return None
+            return False, process.stderr.decode()
 
         process = subprocess.run(
             [
@@ -425,7 +422,7 @@ class ICS4U(CodingClass):
             check=False,
         )
 
-        return process.stdout.decode()
+        return True, process.stdout.decode()
 
     def _grade_junit(self, assignment_path: Path) -> tuple[int, str]:
         """Grade a student based off of the number of pytest tests they pass
@@ -443,12 +440,12 @@ class ICS4U(CodingClass):
         if not code_compiles:
             return (1, f"\n\nError: {err}")
 
-        junit_output = self._run_junit(assignment_dir, assignment_file, test_file)
-        if not junit_output:
-            return (1, f"\n\nJunit could not compile for some reason.. check your code")
+        junit_did_succeed, junit_output = self._run_junit(assignment_dir, assignment_file, test_file)
+        if not junit_did_succeed:
+            return (1, junit_output)
 
         # Calculate their grade based off of how many tests they passed or failed
-        # THe last two lines of output indicate the number of passed and failed tests
+        # The last two lines of output indicate the number of passed and failed tests
         junit_output_lines = junit_output.splitlines()[-3:-1]
 
         def __find_number_in_str(string: str) -> int:
@@ -461,6 +458,7 @@ class ICS4U(CodingClass):
             except ValueError:
                 return 0
             return number
+
         num_passed = __find_number_in_str(junit_output_lines[0])
         num_failed = __find_number_in_str(junit_output_lines[1])
         
@@ -490,16 +488,17 @@ class ICS4U(CodingClass):
         hc_score, hc_comments = self._check_header_comments(file_contents)
         ipo_score, ipo_comments = self._check_ipo(file_contents)
         var_score, var_comments = self._check_variable_names(file_contents)
-        pt_score, pt_comments = self._grade_junit(assignment_path)
+        ju_score, ju_comments = self._grade_junit(assignment_path)
 
         # Calculate weighted score
-        scores = [hc_score, ipo_score, var_score, pt_score]
+        scores = [hc_score, ipo_score, var_score, ju_score]
         weights = [1, 1, 1, 4]
         weighted_score = sum(s * w for s, w in zip(scores, weights)) / sum(weights)
 
         # Generate output comments
         comments_header = f"{' Grading Comments ':=^80}\n"
         variables_header = f"{' Grading Variable Names ':=^80}\n"
+        junit_header = f"{' JUnit Tests ^.^ ':=^80}\n"
 
         comments = (
             comments_header
@@ -507,7 +506,8 @@ class ICS4U(CodingClass):
             + ipo_comments
             + variables_header
             + var_comments
-            + pt_comments
+            + junit_header
+            + ju_comments
         )
 
         return round(weighted_score, 1), comments
