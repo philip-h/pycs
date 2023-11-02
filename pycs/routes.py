@@ -219,8 +219,8 @@ def assignment(class_id, a_id):
         if not os.path.exists(student_dir):
             os.makedirs(student_dir)
 
-        code_file = form.code.data
-        filename = secure_filename(code_file.filename)
+        uploaded_file = form.code.data
+        filename = secure_filename(uploaded_file.filename)
         if assignment.verify_filename(filename):
             upload_path = os.path.join(
                 student_dir,
@@ -228,7 +228,7 @@ def assignment(class_id, a_id):
             )
 
             # Save the code in the upload path
-            code_file.save(upload_path)
+            uploaded_file.save(upload_path)
 
             # Score the user's submission
             grader = Grader(class_id)

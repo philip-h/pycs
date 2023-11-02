@@ -10,10 +10,10 @@ import subprocess
 import shutil
 
 
-def read_code(file_path: Path) -> list[str] | None:
+def read_code(abs_code_path: Path) -> list[str] | None:
     """Read data from given file_path and returns a list of lines"""
     try:
-        with open(file_path, mode="r", encoding="utf-8") as f_in:
+        with open(abs_code_path, mode="r", encoding="utf-8") as f_in:
             return f_in.read().splitlines()
     except FileNotFoundError:
         return None
@@ -22,7 +22,7 @@ def read_code(file_path: Path) -> list[str] | None:
 class CodingClass:
     """A class with a grade_student method"""
 
-    def grade_student(self, assignment_path: Path) -> tuple[int, str]:
+    def grade_student(self, abs_code_path: Path) -> tuple[int, str]:
         """Grade a student based off of their coding style and correctness.
         Returns the achieved level and comments
         """
@@ -147,12 +147,12 @@ class ICS3U(CodingClass):
 
         return 4, "IPO comments are good\n"
 
-    def _run_pytest(self, test_path: Path, assignment_dir: Path) -> str | None:
+    def _run_pytest(self, abs_pytest_path: Path, student_dir: Path) -> str | None:
         """Run the pytest application with a given test_*.py file and a given assignment directory"""
         try:
             process = subprocess.run(
-                ["pytest", "--no-header", "-v", "--tb=short", f"{test_path.name}"],
-                cwd=f"{assignment_dir}",
+                ["pytest", "--no-header", "-v", "--tb=short", f"{abs_pytest_path.name}"],
+                cwd=f"{student_dir}",
                 capture_output=True,
                 timeout=5,
                 check=False,
@@ -162,18 +162,18 @@ class ICS3U(CodingClass):
 
         return process.stdout.decode()
 
-    def _grade_pytest(self, assignment_path: Path) -> tuple[int, str]:
+    def _grade_pytest(self, abs_code_path: Path) -> tuple[int, str]:
         """Grade a student based off of the number of pytest tests they pass
         Returns achieved level and comments.
         """
         # Move pytest file to student's assignment directory
-        assignment_dir = assignment_path.parent
-        assignment_name = assignment_path.name
-        test_path = assignment_dir.parent / "tests" / f"test_{assignment_name}"
-        shutil.copy2(test_path, assignment_dir)
+        student_dir = abs_code_path.parent
+        code_filename = abs_code_path.name
+        abs_pytest_path = student_dir.parent / "tests" / f"test_{code_filename}"
+        shutil.copy2(abs_pytest_path, student_dir)
 
         # Run the pytest
-        pytest_output = self._run_pytest(test_path, assignment_dir)
+        pytest_output = self._run_pytest(abs_pytest_path, student_dir)
         if pytest_output is None:
             return (
                 1,
@@ -183,7 +183,7 @@ class ICS3U(CodingClass):
         # Calculate their grade based off of how many tests they passed or failed
         pytest_output_lines = pytest_output.splitlines()
         test_lines = [
-            line for line in pytest_output_lines if re.search("[\s*\d+%]", line)
+            line for line in pytest_output_lines if re.search(r"[\s*\d+%]", line)
         ]
         num_failed = sum("FAILED" in line for line in test_lines)
         num_passed = sum("PASSED" in line for line in test_lines)
@@ -199,11 +199,11 @@ class ICS3U(CodingClass):
 
         return round(score * 4, 1), pytest_output
 
-    def grade_student(self, assignment_path: Path) -> tuple[int, str]:
+    def grade_student(self, abs_code_path: Path) -> tuple[int, str]:
         """Grade a student based off of their coding style and correctness.
         Returns the achieved level and comments
         """
-        file_contents = read_code(assignment_path)
+        file_contents = read_code(abs_code_path)
         if file_contents is None:
             return 0, "File could not be read... try re-uploading or telling Mr. Habib"
 
@@ -211,7 +211,7 @@ class ICS3U(CodingClass):
         hc_score, hc_comments = self._check_header_comments(file_contents)
         ipo_score, ipo_comments = self._check_ipo(file_contents)
         var_score, var_comments = self._check_variable_names(file_contents)
-        pt_score, pt_comments = self._grade_pytest(assignment_path)
+        pt_score, pt_comments = self._grade_pytest(abs_code_path)
 
         # Calculate weighted score
         scores = [hc_score, ipo_score, var_score, pt_score]
@@ -356,24 +356,26 @@ class ICS4U(CodingClass):
         return 4, "IPO comments are good\n"
 
     def _does_code_compile(
-        self, assignment_path: Path, assignment_dir: Path
+        self, code_filename: str, student_dir: Path
     ) -> tuple[bool, str | None]:
         """Check if the given java code compiles"""
         try:
             process = subprocess.run(
-                ["javac", f"{assignment_path.name}"],
-                cwd=f"{assignment_dir}",
+                ["javac", f"{code_filename}"],
+                cwd=f"{student_dir}",
                 capture_output=True,
                 timeout=5,
                 check=False,
             )
         except subprocess.TimeoutExpired:
             return False, None
-
-        return process.returncode == 0, process.stderr.decode()
+        if process.returncode == 0:
+            return True, process.stdout.decode()
+        else:
+            return False, process.stderr.decode()
 
     def _run_junit(
-        self, assignment_dir: Path, assignment_file: str, test_file: str
+        self, student_dir: Path, code_filename: str, junit_test_filename: str
     ) -> tuple[bool, str]:
         """Run the junit jar file with a given Test*.java file and a given assignment directory"""
         try:
@@ -382,14 +384,14 @@ class ICS4U(CodingClass):
                     "javac",
                     "-cp",
                     str(
-                        assignment_dir.parent
+                        student_dir.parent
                         / "lib"
                         / "junit-platform-console-standalone-1.7.0-all.jar"
                     ),
-                    str(assignment_file),
-                    str(test_file),
+                    str(code_filename),
+                    str(junit_test_filename),
                 ],
-                cwd=f"{assignment_dir}",
+                cwd=f"{student_dir}",
                 capture_output=True,
                 timeout=5,
                 check=False,
@@ -405,18 +407,18 @@ class ICS4U(CodingClass):
                 "java",
                 "-jar",
                 str(
-                    assignment_dir.parent
+                    student_dir.parent
                     / "lib"
                     / "junit-platform-console-standalone-1.7.0-all.jar"
                 ),
                 "-cp",
                 ".",
                 "-c",
-                f"{test_file.removesuffix('.java')}",
+                f"{junit_test_filename.removesuffix('.java')}",
                 "--disable-banner",
                 "--disable-ansi-colors",
             ],
-            cwd=f"{assignment_dir}",
+            cwd=f"{student_dir}",
             capture_output=True,
             timeout=5,
             check=False,
@@ -424,23 +426,24 @@ class ICS4U(CodingClass):
 
         return True, process.stdout.decode()
 
-    def _grade_junit(self, assignment_path: Path) -> tuple[int, str]:
+    def _grade_junit(self, abs_code_path: Path) -> tuple[int, str]:
         """Grade a student based off of the number of pytest tests they pass
         Returns achieved level and comments.
         """
-        # Move pytest file to student's assignment directory
-        assignment_dir = assignment_path.parent
-        assignment_file = assignment_path.name
-        test_file_path = assignment_dir.parent / "tests-java" / f"Test{assignment_file}"
-        shutil.copy2(test_file_path, assignment_dir)
-        test_file = f"Test{assignment_file}"
+        # Move Test file to student's assignment directory
+        student_dir = abs_code_path.parent
+        code_filename = abs_code_path.name
+        junit_test_filename = f"Test{code_filename}"
+        abs_junit_test_path = student_dir.parent / "tests-java" / junit_test_filename 
+        shutil.copy2(abs_junit_test_path, student_dir)
 
-        # Check if code compiles
-        code_compiles, err = self._does_code_compile(assignment_path, assignment_dir)
+
+        # Check if java code compiles
+        code_compiles, err_message = self._does_code_compile(code_filename, student_dir)
         if not code_compiles:
-            return (1, f"\n\nError: {err}")
+            return (1, f"\n\nError: {err_message}")
 
-        junit_did_succeed, junit_output = self._run_junit(assignment_dir, assignment_file, test_file)
+        junit_did_succeed, junit_output = self._run_junit(student_dir, code_filename, junit_test_filename)
         if not junit_did_succeed:
             return (1, junit_output)
 
@@ -476,11 +479,11 @@ class ICS4U(CodingClass):
 
         return round(score * 4, 1), junit_output
 
-    def grade_student(self, assignment_path: Path) -> tuple[int, str]:
+    def grade_student(self, abs_code_path: Path) -> tuple[int, str]:
         """Grade a student based off of their coding style and correctness.
         Returns the achieved level and comments
         """
-        file_contents = read_code(assignment_path)
+        file_contents = read_code(abs_code_path)
         if file_contents is None:
             return 0, "File could not be read... try re-uploading or telling Mr. Habib"
 
@@ -488,7 +491,7 @@ class ICS4U(CodingClass):
         hc_score, hc_comments = self._check_header_comments(file_contents)
         ipo_score, ipo_comments = self._check_ipo(file_contents)
         var_score, var_comments = self._check_variable_names(file_contents)
-        ju_score, ju_comments = self._grade_junit(assignment_path)
+        ju_score, ju_comments = self._grade_junit(abs_code_path)
 
         # Calculate weighted score
         scores = [hc_score, ipo_score, var_score, ju_score]
