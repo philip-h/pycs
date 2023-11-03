@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}pycs/teacher{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="container--surface ass-list">
+        {% for id, name, score in data %}
+        <div class="ass-list__ass">
+            <div class="">
+                <div class="ass__name">
+                </div>
+                    <a class="ass_name__link" href="{{ url_for('.teacher_view_student', class_id=class_id, user_id=id) }}">{{ name }}</a>
+            </div>
+            <div>
+                <span class="ass__score">{{ score }}</span>
+            </div>
+        </div>
+        {% if not loop.last %}
+        <hr class="surface-divider">
+        {% endif %}
+        {% endfor %}
+        </div>
+</div>
+{% endblock %}
