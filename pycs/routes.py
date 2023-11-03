@@ -279,3 +279,105 @@ def change_pass():
             return redirect(url_for(".index"))
 
     return render_template("changepass.html", form=form)
+
+###############################################################################
+# Teaher Routes
+###############################################################################
+@routes.get("/teacher")
+@login_required
+def teacher():
+    return render_template("teacher/classes.html", classes=current_user.classes)
+
+@routes.route("/teacher/<int:class_id>", methods=["GET"])
+@login_required
+def teacher_view_students(class_id: int):
+    """A teacher portal for managing students
+    Home page shows a list of classes the teacher teaches.
+    """
+
+    query_get_students = text(
+    """
+    SELECT u.id, u.first_name, COUNT(ua.score) as num_ass
+    FROM user u
+    JOIN user_assignment ua
+    ON u.id = ua.user_id
+    JOIN assignment a
+    ON a.id = ua.assignment_id
+    WHERE a.class_id=:class_id
+    GROUP BY u.id
+    ORDER BY num_ass
+    """)
+    data = db_session.execute(query_get_students.bindparams(class_id=class_id)).fetchall()
+
+    return render_template("teacher/index.html", data=data, class_id=class_id)
+
+
+@routes.route("/teacher/<int:class_id>/<int:user_id>", methods=["GET"])
+@login_required
+def teacher_view_student(class_id: int, user_id: int):
+    """View all the marks of a particular student"""
+
+    user = db_session.scalar(select(User).where(User.id == user_id))
+    assignments_scores = db_session.execute(
+        select(Assignment, UserAssignment)
+        .outerjoin(
+            UserAssignment,
+            (UserAssignment.assignment_id == Assignment.id)
+            & (UserAssignment.user_id == user_id),
+        )
+        .where(Assignment.class_id == class_id)
+        .order_by(desc(Assignment.id))
+    ).fetchall()
+
+    assignments = {}
+    for a, ua in assignments_scores:
+        if a.unit_name not in assignments:
+            assignments[a.unit_name] = []
+
+        if ua is None:
+            if a.due_date < datetime.today():
+                score = 0
+            else:
+                score = None
+        else:
+            score = ua.score
+
+        # Don't send invisible assignments to the client
+        if a.visible:
+            assignments[a.unit_name].append(
+                {
+                    "id": a.id,
+                    "name": a.name,
+                    "due_date": a.due_date,
+                    "score": score,
+                    "total": a.total_points,
+                    "class_id": a.class_id,
+                }
+            )
+    # Calculate studen't average
+    # Don't include missing assignments in the grade calculation
+    # ONLY IF we are not past the due date
+    marks, weights = [], []
+    for a, ua in assignments_scores:
+        if ua:
+            marks.append(ua.score / a.total_points)
+            weights.append(a.weight)
+        elif a.due_date < datetime.today():
+            marks.append(0)
+            weights.append(a.weight)
+
+    if len(marks) == 0:
+        avg = "0"
+    else:
+        avg = round(
+            (sum(m * w for m, w in zip(marks, weights)) / sum(weights)) * 100, 2
+        )
+
+    return render_template(
+        "app.html", assignments_by_unit=assignments, avg=avg, today=datetime.now()
+    )
+
+
+
+
+
