@@ -74,6 +74,6 @@ def init_admin(app: Flask):
     admin.add_view(AdminUserMV(User, db_session))
     admin.add_view(AdminAssignmentMV(Assignment, db_session))
     admin.add_view(AdminScoresMV(UserAssignment, db_session))
-    admin.add_view(ModelView(Classroom, db_session))
+    admin.add_view(AdminMV(Classroom, db_session))
 
     admin.add_link(MenuLink(name="Pycs", url="/"))
