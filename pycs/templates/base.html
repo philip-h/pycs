@@ -11,7 +11,7 @@
 <body class="app">
   <nav class="nav">
     <div class="nav__brand">
-      <a class="nav__brand__link" href="{{ url_for('.index') }}">PYCS</a>
+      <a class="nav__brand__link" href="{{ url_for('main.index') }}">PYCS</a>
     </div>
     {% if current_user.is_authenticated %}
         <p>Hey {{ current_user.first_name }}!</p>
@@ -21,18 +21,18 @@
         <div class="container container--surface nav__menu" id="navMenu">
           <div class="nav__menu__items">
             {% if current_user.is_admin %}
-              <a class="nav__menu__item" href="{{ url_for('admin.index') }}">Admin</a>
+              <a class="nav__menu__item" href="{{ url_for('teacher.index') }}">Admin</a>
               <hr class="surface-divider">
             {% endif %}
-            <a class="nav__menu__item" href="{{ url_for('.change_pass') }}">Change Password</a>
+            <a class="nav__menu__item" href="{{ url_for('auth.change_pass') }}">Change Password</a>
             <hr class="surface-divider">
-            <a class="nav__menu__item" href="{{ url_for('.logout') }}">Logout</a>
+            <a class="nav__menu__item" href="{{ url_for('auth.logout') }}">Logout</a>
           </div>
         </div>
     {% else %}
         <div class="nav__links">
-          <a class="nav__link" href="{{ url_for('.register') }}">Register</a>
-          <a class="nav__link" href="{{ url_for('.login') }}">Login</a>
+          <a class="nav__link" href="{{ url_for('auth.register') }}">Register</a>
+          <a class="nav__link" href="{{ url_for('auth.login') }}">Login</a>
         </div>
     {% endif %}
   </nav> 
@@ -40,3 +40,4 @@
   {% block content %}{% endblock %}
 </body>
 </html>
+

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}pycs/teacher/classes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <a href="/teacher/classes/new" class="button-link">New Classroom</a>
+</div>
+<div class="container">
+    <div class="container--surface ass-list">
+        {% if classrooms|length == 0 %}
+        <p>Oops... There are no classrooms in pycs...</p>
+        {% endif %}
+        {% for classroom in classrooms %}
+        <div class="ass-list__ass">
+            <div>
+                <div class="ass__name">
+                    <a class="ass__name__link" href="{{ url_for('.view_edit_classes', class_id=classroom.id) }}">{{ classroom.course_code }}</a>
+                </div>
+                <div class="ass__due">{{ classroom.year }}.sem{{ classroom.sem }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+

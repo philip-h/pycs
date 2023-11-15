@@ -5,12 +5,21 @@ Flask-WTF Form definitions
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import (
+    DateField,
+    IntegerField,
+    StringField,
+    PasswordField,
+    BooleanField,
+    SubmitField,
+    validators,
+)
 from wtforms.validators import DataRequired, EqualTo, Length
 
 
 class UserPassForm(FlaskForm):
     """A parent form that contains student_number and password fields"""
+
     student_number = StringField(
         "Student number",
         validators=[
@@ -29,6 +38,7 @@ class UserPassForm(FlaskForm):
 
 class RegisterForm(UserPassForm):
     """Registration requires a first name and another field to confirm their password"""
+
     first_name = StringField("First name", validators=[DataRequired()])
     confirm_pass = PasswordField(
         "Confirm password",
@@ -42,12 +52,14 @@ class RegisterForm(UserPassForm):
 
 class LoginForm(UserPassForm):
     """Login form gives user's the option to remember their session (Thanks Flask-Login)"""
+
     remember = BooleanField("Remember me?")
     submit = SubmitField(label="Login")
 
 
 class ChangePassForm(FlaskForm):
     """Change password form"""
+
     current_pass = PasswordField(
         "Current password",
         validators=[
@@ -74,6 +86,40 @@ class ChangePassForm(FlaskForm):
 
 class UploadCodeForm(FlaskForm):
     """Upload code Form"""
+
     code = FileField(
-        validators=[FileRequired(), FileAllowed(["py", "java"], "Python code (or java code) only")]
+        validators=[
+            FileRequired(),
+            FileAllowed(["py", "java"], "Python code (or java code) only"),
+        ]
     )
+
+
+class JoinClassForm(FlaskForm):
+    """Join class form"""
+
+    class_code = StringField("Class code", validators=[DataRequired()])
+    submit = SubmitField(label="Join")
+
+
+class AssignmentForm(FlaskForm):
+    """New / Edit assignment form"""
+
+    name = StringField("Name", validators=[DataRequired()])
+    unit_name = StringField("Unit Name", validators=[DataRequired()])
+    required_filename = StringField("Required Filename", validators=[DataRequired()])
+    total_points = IntegerField("Total Points", validators=[DataRequired()])
+    due_date = DateField("Due Date", validators=[DataRequired()])
+    visible = BooleanField("Visible?", validators=[DataRequired()])
+    weight = IntegerField("Weight", validators=[DataRequired()])
+    class_id = IntegerField("Class Id", validators=[DataRequired()])
+    submit = SubmitField(label="Submit")
+
+class ClassroomForm(FlaskForm):
+    """New / Edit assignment form"""
+
+    course_code = StringField("Course Code", validators=[DataRequired()])
+    year = IntegerField("Year", validators=[DataRequired()])
+    sem = IntegerField("Semester", validators=[DataRequired()])
+    teacher_id = IntegerField("Teacher Id", validators=[DataRequired()])
+    submit = SubmitField(label="Submit")

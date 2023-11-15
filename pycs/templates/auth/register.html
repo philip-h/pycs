@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% from '_formhelpers.html' import render_field %}
+
+{% block title %}register{% endblock %}
+
+{% block content %}
+<div class="container container--surface">
+    <!-- Field errors -->
+    {% if form.errors %}
+        <ul class="form-errors">
+            {% for _, ferrors in form.errors|dictsort if ferrors %}
+                {% for error in ferrors %}
+                    <li class="form-errors__error">{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form class="form" method="post">
+        {{ form.csrf_token }}
+        {{ render_field(form.student_number) }}
+        {{ render_field(form.first_name) }}
+        {{ render_field(form.password) }}
+        {{ render_field(form.confirm_pass) }}
+        {{ form.submit(class="form__input__submit")}}
+    </form>
+</div>
+
+{% endblock %}
+

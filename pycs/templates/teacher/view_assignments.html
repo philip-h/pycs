@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}pycs/teacher/assignments{% endblock %}
+
+{% block content %}
+<div class="container">
+    <a href="/teacher/assignments/new" class="button-link">New Assignment</a>
+</div>
+<div class="container">
+    <div class="container--surface ass-list">
+        {% if assignments|length == 0 %}
+        <p>Oops... There are no assignments in pycs...</p>
+        {% endif %}
+        {% for a in assignments %}
+        <div class="ass-list__ass""> 
+            <div>
+                <div class="ass__name">
+                    <a class="ass__name__link" href="{{ url_for('.view_edit_assignment', a_id=a.id) }}">{{ a.name }}</a>
+                </div>
+                <div class="ass__due">{{ a.classroom.course_code }}</div>
+            </div>
+        </div>
+        {% if not loop.last %}
+        <hr class="surface-divider">
+        {% endif %}
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
+
+

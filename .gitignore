@@ -20,3 +20,5 @@ tags
 
 .vscode/
 
+load_test_db.py
+

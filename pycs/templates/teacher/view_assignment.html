@@ -1,7 +1,8 @@
+
 {% extends 'base.html' %}
 {% from '_formhelpers.html' import render_field %}
 
-{% block title %}register{% endblock %}
+{% block title %}pycs/teacher/assignment{% endblock %}
 
 {% block content %}
 <div class="container container--surface">
@@ -18,12 +19,19 @@
 
     <form class="form" method="post">
         {{ form.csrf_token }}
-        {{ render_field(form.student_number) }}
-        {{ render_field(form.first_name) }}
-        {{ render_field(form.password) }}
-        {{ render_field(form.confirm_pass) }}
-        {{ form.submit(class="form__input__submit")}}
+        {{ render_field(form.name) }}
+        {{ render_field(form.unit_name) }}
+        {{ render_field(form.required_filename) }}
+        {{ render_field(form.total_points) }}
+        {{ render_field(form.due_date) }}
+        <div class="form__input">
+            {{ form.visible.label(class="form__input__label") }}
+            {{ form.visible(class="form__input__box") }}
+        </div>
+        {{ render_field(form.weight) }}
+        {{ render_field(form.class_id) }}
+        {{ form.submit(class="form__input__submit") }}
     </form>
 </div>
-
 {% endblock %}
+

@@ -1,18 +1,18 @@
 {% extends 'base.html' %}
 
-{% block title %}pycs/{% endblock %}
+{% block title %}pycs/teacher/student{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2 class="current-avg">{{ avg }}%</h2>
-    {% for unit, assignments in assignments_by_unit.items() %}
+    <h2 class="current-avg">{{ student_avg }}%</h2>
+    {% for unit, assignments in assignments.items() %}
     <h1 class="unit-name">{{ unit }}</h1>
     <div class="container--surface ass-list">
         {% for a in assignments %}
         <div class="ass-list__ass">
             <div class="">
                 <div class="ass__name">
-                    <a class="ass__name__link {{ 'ass__name__link--overdue' if a.due_date < today }}" href="{{ url_for('.assignment', class_id=a.class_id, a_id=a.id) }}">{{ a.name }}</a>
+                    <a class="ass__name__link {{ 'ass__name__link--overdue' if a.due_date < today }}" href="{{ url_for('.view_student_assignment', student_number=user.student_number, class_id=class_id, a_id=a.id)  }}">{{ a.name }}</a>
                 </div>
                 <div class="ass__due">Due: {{ a.due_date.strftime("%a %b %d, %Y @ %H:%M") }}</div>
             </div>
@@ -31,3 +31,4 @@
     {% endfor %}
 </div>
 {% endblock %}
+

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}pycs/teacher/assignment{% endblock %}
+
+{% block content%}
+<div class="container">
+  <h1 class="assignment-title">{{ assignment.name }}</h1>
+</div>
+
+<div class="container assignment-info">
+  {% if data %}
+  <h2 class="assignment-info__title">Grade: {{ data.score }} / {{ assignment.total_points }}</h2>
+  {% else %}
+  <h2 class="assignment-info__title">Not submitted yet!</h2>
+  {% endif %}
+  <p class="assignment-info__due">Due: {{ assignment.due_date.strftime("%a %b %d, %Y @ %H:%M") }}</p>
+</div>
+
+<div class="container assignment-comments">
+  {% if data %}
+  <pre class="assignment-comment">{{ data.comments }}</pre>
+  {% endif %}
+</div>
+{% endblock %}

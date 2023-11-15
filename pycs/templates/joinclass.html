@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% from '_formhelpers.html' import render_field %}
 
-{% block title %}register{% endblock %}
+{% block title %}joinclass{% endblock %}
 
 {% block content %}
 <div class="container container--surface">
@@ -18,11 +18,10 @@
 
     <form class="form" method="post">
         {{ form.csrf_token }}
-        {{ render_field(form.current_pass) }}
-        {{ render_field(form.new_pass) }}
-        {{ render_field(form.confirm_new_pass) }}
-        {{ form.submit(class="form__input__submit")}}
+        {{ render_field(form.class_code) }}
+        {{ form.submit(class="form__input__submit") }}
     </form>
 </div>
-
 {% endblock %}
+
+

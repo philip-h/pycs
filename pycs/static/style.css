@@ -181,7 +181,7 @@ img, svg {
 
 .form__input__field {
     display: block;
-    width: 100%;;
+    width: 100%;
     padding: 0.25rem;
 }
 
@@ -246,7 +246,7 @@ img, svg {
 }
 
 .form-errors__error {
-    background-color:var(--clr-bad); 
+    background-color: var(--clr-bad); 
     padding: 1rem;
     border-radius: 5px;
     margin-bottom: 0.5rem;
@@ -267,6 +267,27 @@ img, svg {
 .unit-name {
     font-size: 2rem;
     margin: var(--surface-padding) 0;
+}
+
+.search-box {
+    padding: var(--surface-padding);
+    margin-bottom: var(--surface-padding);
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+}
+
+.search-box__input {
+    padding: var(--surface-padding);
+    background-color: var(--clr-primary);
+    width: 100%;
+    outline: none;
+    border: none;
+    border-bottom: 1px solid var(--clr-accent);
+    margin-left: var(--surface-padding);
 }
 
 .ass-list {
@@ -325,6 +346,10 @@ img, svg {
     color: var(--clr-good); 
 }
 
+.hidden {
+    display: none;
+}
+
 .assignment-title {
     font-size: 2rem;
     margin-bottom: 2rem;
@@ -362,6 +387,20 @@ img, svg {
     font-size: 1rem;
 }
 
+.button-link {
+    padding: 1rem;
+    background-color: var(--clr-accent);
+    text-decoration: none;
+    border-radius: 5px;
+    -webkit-transition: background-color 0.25s ease-in-out;
+    -o-transition: background-color 0.25s ease-in-out;
+    transition: background-color 0.25s ease-in-out;
+}
+
+.button-link:hover {
+    background-color: var(--clr-accent-on-surface);
+}
+
 @media (prefers-color-scheme: light) {
     :root {
         --clr-primary: rgb(255, 255, 255);
@@ -378,3 +417,4 @@ img, svg {
         max-width: 80%;
     }
 }
+
