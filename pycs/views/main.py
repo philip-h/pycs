@@ -1,5 +1,6 @@
 from datetime import datetime
 from http import HTTPStatus
+import markdown
 import os
 from pathlib import Path
 
@@ -91,6 +92,10 @@ def student_assignment(class_id: int, a_id: int):
         else user_assignment.assignment
     )
 
+    # If we can't find the assignment for whatever reason...
+    if assignment is None:
+        abort(HTTPStatus.NOT_FOUND)
+
     # SQLite only really does incremental primary keys.
     # This bit of code stopes snoopy students from checking
     # assignments by increasing the id in the url
@@ -98,53 +103,56 @@ def student_assignment(class_id: int, a_id: int):
     if not assignment.visible and not current_user.is_admin:
         abort(HTTPStatus.NOT_FOUND)
 
-    form = UploadCodeForm()
+    form = None
+    if assignment.submission_required:
+        form = UploadCodeForm()
 
-    if form.validate_on_submit():
-        # Make student directory if it dne
-        student_dir = os.path.join(
-            current_app.config["UPLOAD_FOLDER"], f"{current_user.student_number}"
-        )
-        if not os.path.exists(student_dir):
-            os.makedirs(student_dir)
-
-        uploaded_file = form.code.data
-        filename = secure_filename(uploaded_file.filename)
-        if assignment.verify_filename(filename):
-            upload_path = os.path.join(
-                student_dir,
-                f"{filename}",
+        if form.validate_on_submit():
+            # Make student directory if it dne
+            student_dir = os.path.join(
+                current_app.config["UPLOAD_FOLDER"], f"{current_user.student_number}"
             )
+            if not os.path.exists(student_dir):
+                os.makedirs(student_dir)
 
-            # Save the code in the upload path
-            uploaded_file.save(upload_path)
-
-            # Score the user's submission
-            grader: GradingStrategy = (
-                ICS3UGrader(Path(upload_path))
-                if class_id == 1
-                else ICS4UGrader(Path(upload_path))
-            )
-            try:
-                score, comments = grader.grade_student()
-            except FileNotFoundError:
-                score, comments = (
-                    0,
-                    f"Tell Mr. Habib  that he forgot to upload the test file to assignment: {assignment.name}",
+            uploaded_file = form.code.data
+            filename = secure_filename(uploaded_file.filename)
+            if assignment.verify_filename(filename):
+                upload_path = os.path.join(
+                    student_dir,
+                    f"{filename}",
                 )
 
-            # Has the user already submitted? If so, we are just updating the score
-            if user_assignment is not None:
-                ass_controller.update_ass_score(user_assignment, score, comments)
+                # Save the code in the upload path
+                uploaded_file.save(upload_path)
+
+                # Score the user's submission
+                grader: GradingStrategy = (
+                    ICS3UGrader(Path(upload_path))
+                    if class_id == 1
+                    else ICS4UGrader(Path(upload_path))
+                )
+                try:
+                    score, comments = grader.grade_student()
+                except FileNotFoundError:
+                    score, comments = (
+                        0,
+                        f"Tell Mr. Habib  that he forgot to upload the test file to assignment: {assignment.name}",
+                    )
+
+                # Has the user already submitted? If so, we are just updating the score
+                if user_assignment is not None:
+                    ass_controller.update_ass_score(user_assignment, score, comments)
+                else:
+                    ass_controller.score_ass(current_user, assignment, score, comments)
+
+                return redirect(request.url)
             else:
-                ass_controller.score_ass(current_user, assignment, score, comments)
+                form.code.errors.append(
+                    f"Uploaded file must be named {assignment.required_filename}. Yours is {filename}"
+                )
 
-            return redirect(request.url)
-        else:
-            form.code.errors.append(
-                f"Uploaded file must be named {assignment.required_filename}. Yours is {filename}"
-            )
-
+    instructions = markdown.markdown(assignment.instructions)
     return render_template(
-        "view_assignment.html", assignment=assignment, data=user_assignment, form=form
+        "view_assignment.html", assignment=assignment, instructions=instructions, data=user_assignment, form=form
     )
