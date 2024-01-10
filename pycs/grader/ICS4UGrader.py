@@ -90,26 +90,14 @@ class ICS4UGrader(GradingStrategy):
 
     def grade_ipo_comments(self) -> tuple[float, str]:
         file_string = "\n".join([line.strip().lower() for line in self.file_contents])
-        has_i = re.search(r"^\/\/\s?[Ii]nput$", file_string, re.MULTILINE)
-        has_p = re.search(r"^\/\/\s?[Pp]rocessing$", file_string, re.MULTILINE)
-        has_o = re.search(r"^\/\/\s?[Oo]utput$", file_string, re.MULTILINE)
-        has_po = re.search(
-            r"^\/\/\s?[Pp]rocessing\s?/\s?[Oo]utput$", file_string, re.MULTILINE
-        )
+        code_comments = re.findall(r"^\/\/\s?\w+", file_string, re.MULTILINE)
 
-        # Valid ipo comments:
-        # All three present
-        valid1 = has_i and has_p and has_o
-        # Processing and output are combined
-        valid2 = has_i and has_po
-
-        if not any([has_i, has_p, has_o, has_po]):
-            return 0, "Missing IPO comments\n"
-
-        if not valid1 and not valid2:
-            return 2, "Incomplete or incorrect IPO comments\n"
-
-        return 4, "IPO comments are good\n"
+        if len(code_comments) == 0:
+            return 0, "Missing comments\n"
+        if len(code_comments) < 2:
+            return 2, "Come on, you can do better than one comment ;)\n"
+        
+        return 4, "Comments are good\n"
 
     def _does_code_compile(
         self, code_filename: str, student_dir: Path
@@ -134,18 +122,43 @@ class ICS4UGrader(GradingStrategy):
         self, student_dir: Path, code_filename: str, junit_test_filename: str
     ) -> tuple[bool, str]:
         """Run the junit jar file with a given Test*.java file and a given assignment directory"""
+        process = subprocess.run(
+            [
+                "javac",
+                "-cp",
+                str(
+                    student_dir.parent
+                    / "lib"
+                    / "junit-platform-console-standalone-1.7.0-all.jar"
+                ),
+                str(code_filename),
+                str(junit_test_filename),
+            ],
+            cwd=f"{student_dir}",
+            capture_output=True,
+            timeout=5,
+            check=False,
+            )
+
+        if process.returncode != 0:
+            return False, process.stderr.decode()
+
         try:
             process = subprocess.run(
                 [
-                    "javac",
-                    "-cp",
+                    "java",
+                    "-jar",
                     str(
                         student_dir.parent
                         / "lib"
                         / "junit-platform-console-standalone-1.7.0-all.jar"
                     ),
-                    str(code_filename),
-                    str(junit_test_filename),
+                    "-cp",
+                    ".",
+                    "-c",
+                    f"{junit_test_filename.removesuffix('.java')}",
+                    "--disable-banner",
+                    "--disable-ansi-colors",
                 ],
                 cwd=f"{student_dir}",
                 capture_output=True,
@@ -157,31 +170,6 @@ class ICS4UGrader(GradingStrategy):
                 False,
                 "I think you have an infinite loop in your code (OR infinite recursion!)",
             )
-
-        if process.returncode != 0:
-            return False, process.stderr.decode()
-
-        process = subprocess.run(
-            [
-                "java",
-                "-jar",
-                str(
-                    student_dir.parent
-                    / "lib"
-                    / "junit-platform-console-standalone-1.7.0-all.jar"
-                ),
-                "-cp",
-                ".",
-                "-c",
-                f"{junit_test_filename.removesuffix('.java')}",
-                "--disable-banner",
-                "--disable-ansi-colors",
-            ],
-            cwd=f"{student_dir}",
-            capture_output=True,
-            timeout=5,
-            check=False,
-        )
 
         return True, process.stdout.decode()
 
