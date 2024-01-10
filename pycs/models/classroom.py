@@ -11,7 +11,7 @@ class Classroom(db.Model):
     year: Mapped[int]
     sem: Mapped[int]
     teacher_id: Mapped[int]
-    assignment: Mapped["Assignment"] = relationship(back_populates="classroom")
+    assignments: Mapped[list["Assignment"]] = relationship(back_populates="classroom")
     users: Mapped[list["User"]] = relationship(
         secondary="user_classroom", back_populates="classes"
     )
