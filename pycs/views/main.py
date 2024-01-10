@@ -152,7 +152,7 @@ def student_assignment(class_id: int, a_id: int):
                     f"Uploaded file must be named {assignment.required_filename}. Yours is {filename}"
                 )
 
-    instructions = markdown.markdown(assignment.instructions)
+    instructions = markdown.markdown(assignment.instructions, extensions=["fenced_code"])
     return render_template(
         "view_assignment.html", assignment=assignment, instructions=instructions, data=user_assignment, form=form
     )
