@@ -9,6 +9,7 @@ from wtforms import (
     DateField,
     IntegerField,
     StringField,
+    TextAreaField,
     PasswordField,
     BooleanField,
     SubmitField,
@@ -106,11 +107,13 @@ class AssignmentForm(FlaskForm):
     """New / Edit assignment form"""
 
     name = StringField("Name", validators=[DataRequired()])
+    instructions = TextAreaField("Instructions", validators=[DataRequired()])
     unit_name = StringField("Unit Name", validators=[DataRequired()])
-    required_filename = StringField("Required Filename", validators=[DataRequired()])
+    submission_required = BooleanField("Submission Required?") 
+    required_filename = StringField("Required Filename")
     total_points = IntegerField("Total Points", validators=[DataRequired()])
     due_date = DateField("Due Date", validators=[DataRequired()])
-    visible = BooleanField("Visible?", validators=[DataRequired()])
+    visible = BooleanField("Visible?")
     weight = IntegerField("Weight", validators=[DataRequired()])
     class_id = IntegerField("Class Id", validators=[DataRequired()])
     submit = SubmitField(label="Submit")

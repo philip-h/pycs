@@ -5,6 +5,11 @@
 {% block content%}
 <div class="container">
   <h1 class="assignment-title">{{ assignment.name }}</h1>
+  <h2 class="assignment-title-instructions">Instructions</h2>
+  <p>{{ instructions|safe }}</p>
+</div>
+{% if form %}
+<div class="container">
   <div class="container--surface">
     <!-- Field errors -->
     {% if form.errors %}
@@ -26,6 +31,7 @@
     </form>
   </div>
 </div>
+{% endif %}
 
 <div class="container assignment-info">
   {% if data %}

@@ -13,14 +13,16 @@ class Assignment(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
+    instructions: Mapped[str]
     total_points: Mapped[int] = mapped_column(default=4)
-    required_filename: Mapped[str]
+    submission_required: Mapped[bool]
+    required_filename: Mapped[str] = mapped_column(nullable=True)
     due_date: Mapped[datetime]
     visible: Mapped[bool]
     unit_name: Mapped[str]
     weight: Mapped[int]
     class_id: Mapped[int] = mapped_column(ForeignKey("classroom.id"))
-    classroom: Mapped["Classroom"] = relationship(back_populates="assignment")
+    classroom: Mapped["Classroom"] = relationship(back_populates="assignments")
 
     user_associations: Mapped[list["UserAssignment"]] = relationship(
         back_populates="assignment"

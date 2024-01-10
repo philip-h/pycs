@@ -356,6 +356,11 @@ img, svg {
     text-align: center;
 }
 
+.assignment-title-instructions {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+}
+
 .upload-container {
     background-color: var(--clr-primary); 
     -webkit-box-shadow: var(--shadow); 

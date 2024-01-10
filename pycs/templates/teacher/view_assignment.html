@@ -20,6 +20,7 @@
     <form class="form" method="post">
         {{ form.csrf_token }}
         {{ render_field(form.name) }}
+        {{ render_field(form.instructions) }}
         {{ render_field(form.unit_name) }}
         {{ render_field(form.required_filename) }}
         {{ render_field(form.total_points) }}
@@ -27,6 +28,10 @@
         <div class="form__input">
             {{ form.visible.label(class="form__input__label") }}
             {{ form.visible(class="form__input__box") }}
+        </div>
+        <div class="form__input">
+            {{ form.submission_required.label(class="form__input__label") }}
+            {{ form.submission_required(class="form__input__box") }}
         </div>
         {{ render_field(form.weight) }}
         {{ render_field(form.class_id) }}
