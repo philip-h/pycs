@@ -10,7 +10,22 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if not current_user.is_authenticated:
-            abort(HTTPStatus.UNAUTHORIZED)
+            abort(HTTPStatus.NOT_FOUND)
+
+        return view(**kwargs)
+
+    return wrapped_view
+
+# Authorization decorator
+def teacher_login_required(view):
+    """If a route requires the user to be logged in, force a 401 error!"""
+
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if not current_user.is_authenticated:
+            abort(HTTPStatus.NOT_FOUND)
+        if not current_user.is_admin:
+            abort(HTTPStatus.NOT_FOUND)
 
         return view(**kwargs)
 
