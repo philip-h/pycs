@@ -26,6 +26,30 @@
                 <a class="ass__name__link" href="{{ url_for('.view_classes') }}">Manage Classes</a>
             </div>
         </div>
+
+        <hr class="surface-divider">
+
+        <div class="ass-list__ass">
+            <div class="ass__name">
+                <a class="ass__name__link" href="{{ url_for('.import_marks') }}">Import Marks</a>
+            </div>
+        </div>
+
+        <hr class="surface-divider">
+
+        <div class="ass-list__ass">
+            <div class="ass__name">
+                <a class="ass__name__link" href="{{ url_for('.export_3u_marks') }}">Export ICS3U Marks</a>
+            </div>
+        </div>
+
+        <hr class="surface-divider">
+
+        <div class="ass-list__ass">
+            <div class="ass__name">
+                <a class="ass__name__link" href="{{ url_for('.export_4u_marks') }}">Export ICS4U Marks</a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

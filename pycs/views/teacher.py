@@ -1,6 +1,16 @@
 from datetime import datetime
-from os import walk
-from flask import Blueprint, current_app, redirect, render_template, url_for
+import io
+import os
+from pathlib import Path
+
+from flask import (
+    Blueprint,
+    current_app,
+    redirect,
+    render_template,
+    url_for,
+    send_file,
+)
 from pycs.controllers import user as user_controller
 from pycs.controllers import assignment as ass_controller
 from pycs.controllers import classroom as class_controller
@@ -145,3 +155,60 @@ def view_edit_classes(class_id: int | None = None):
         return redirect(url_for(".view_classes"))
 
     return render_template("teacher/view_class.html", form=form)
+
+
+###############################################################################
+####################        Mark Import / Export           ####################
+###############################################################################
+
+
+@bp.get("/import")
+@teacher_login_required
+def import_marks():
+    return "Not implemented yet"
+
+
+def _export_marks(class_id: int) -> (str, str):
+    # Create a file
+    classroom = class_controller.get_classroom_by_id(class_id)
+    # Header row
+    header = ",".join(["Name", "Average"]+[a.name for a in sorted(classroom.assignments, key=lambda x: x.id, reverse=True)])
+    body = ""
+
+    for user in classroom.users:
+        assignment_scores = ass_controller.get_class_assignments_of_user(class_id, user.id).fetchall()
+        avg = ass_controller.calc_overall_avg(assignment_scores)
+        body_line = ",".join([user.first_name, str(avg)] + [str(ua.score) if ua else "0" for _, ua in assignment_scores])
+        # body_line = ",".join([user.first_name] + [str(ua.score) for ua in sorted(user.assignment_associations, key=lambda x: x.assignment_id)])
+        body += body_line + "\n"
+
+    file_name = Path(f"marks_{classroom.course_code}_{datetime.today()}.csv")
+    file_directory = os.path.join(current_app.config["EXPORTED_FILES"])
+    with open(file_directory / file_name, "w") as f_out:
+        f_out.write(f"{header}\n{body}")
+    
+    return file_directory, file_name
+
+
+
+@bp.get("/export3u")
+@teacher_login_required
+def export_3u_marks():
+    file_directory, file_name = _export_marks(class_id=1)
+    data = io.BytesIO()
+    with open(file_directory / file_name, mode="rb") as f_out:
+        data.write(f_out.read())
+    data.seek(0)
+    os.remove(file_directory / file_name)
+    return send_file(data, mimetype="text/csv", download_name=str(file_name), as_attachment=True)
+
+@bp.get("/export4u")
+@teacher_login_required
+def export_4u_marks():
+    file_directory, file_name = _export_marks(class_id=2)
+    data = io.BytesIO()
+    with open(file_directory / file_name, mode="rb") as f_out:
+        data.write(f_out.read())
+    data.seek(0)
+    os.remove(file_directory / file_name)
+    return send_file(data, mimetype="text/csv", download_name=str(file_name), as_attachment=True)

@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask, render_template
 
 
 def create_app(test_config=None):
@@ -10,6 +10,7 @@ def create_app(test_config=None):
         SECRET_KEY="dev",
         SQLALCHEMY_DATABASE_URI = "sqlite:///mac.db",
         UPLOAD_FOLDER=os.path.join(app.instance_path, "code"),
+        EXPORTED_FILES=os.path.join(app.instance_path, "exports"),
     )
 
     if test_config is None:
@@ -47,6 +48,14 @@ def create_app(test_config=None):
     except FileExistsError:
         print("Java tests folder already exists :)")
 
+    # ensure exports folder exists!
+    try:
+        os.makedirs(
+            os.path.join(app.instance_path, app.config["EXPORTED_FILES"])
+        )
+    except FileExistsError:
+        print("Exports folder already exists :)")
+
 
     # Configure extensions
     from .extensions import init_app
@@ -60,5 +69,20 @@ def create_app(test_config=None):
     @app.route("/hello")
     def hello():
         return "Hello, World!"
+    
+    ###############################################################################
+    # Error Handling
+    ###############################################################################
+    @app.errorhandler(401)
+    def unauthorized(error):
+        """Customm 401 Unauthorized page"""
+        return render_template("401.html", error=error), 401
+
+    @app.errorhandler(404)
+    def not_found(error):
+        """Custom 404 Not Found page"""
+        return render_template("404.html", error=error), 404
+
+    
 
     return app
