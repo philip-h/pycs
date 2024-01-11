@@ -1,0 +1,11 @@
+{
+  "name": "pycs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:philip-h/pycs.git",
+  "author": "philip-h <philip.habib6347@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+}

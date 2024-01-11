@@ -361,6 +361,11 @@ img, svg {
     margin-bottom: 2rem;
 }
 
+code {
+    margin: 2rem 0;
+    border-radius: 0.5rem;
+}
+
 .upload-container {
     background-color: var(--clr-primary); 
     -webkit-box-shadow: var(--shadow); 
