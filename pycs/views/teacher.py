@@ -1,5 +1,6 @@
 from datetime import datetime
 import io
+import markdown
 import os
 from pathlib import Path
 
@@ -79,10 +80,14 @@ def view_student_assignment(student_number: int, class_id: int, a_id: int):
         else user_assignment.assignment
     )
 
+    instructions = markdown.markdown(assignment.instructions, extensions=["fenced_code"])
     return render_template(
         "teacher/view_student_assignment.html",
         assignment=assignment,
+        instructions=instructions,
         data=user_assignment,
+        user=user,
+        form=None
     )
 
 
@@ -118,7 +123,7 @@ def view_edit_assignment(a_id: int | None = None):
 
         return redirect(url_for(".view_assignments"))
 
-    return render_template("teacher/view_assignment.html", form=form)
+    return render_template("teacher/assignment_form.html", form=form)
 
 
 ###############################################################################
@@ -154,7 +159,7 @@ def view_edit_classes(class_id: int | None = None):
 
         return redirect(url_for(".view_classes"))
 
-    return render_template("teacher/view_class.html", form=form)
+    return render_template("teacher/class_form.html", form=form)
 
 
 ###############################################################################

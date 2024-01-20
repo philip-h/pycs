@@ -1,0 +1,25 @@
+{% macro render_list_item(title, title_url, sub_title=None, score=None, total_points=None) %}
+<div class="flex justify-between items-center">
+    <div>
+        <div class="mb-2">
+          <a href="{{ title_url }}" class="text-nord-10 hover:text-nord-8 dark:text-nord-8 dark:hover:text-nord-10 transition-colors">{{ title }}</a>
+        </div>
+        {% if sub_title %}
+        <div class="text-sm opacity-70">{{ sub_title }}</div>
+        {% endif %}
+    </div>
+    {% if score is not none%}
+    <div>
+      <span class="text-nord-14">{{ score }}</span>
+      {% if total_points is not none %}
+      <span>/ {{ total_points }}</span>
+      {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+
+{% macro render_list_sep() %}
+<hr class="border-nord-0 dark:border-nord-6 -mx-4">
+{% endmacro %}

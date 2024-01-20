@@ -1,30 +1,17 @@
 {% extends 'base.html' %}
-{% from '_formhelpers.html' import render_field %}
+{% from '_formhelpers.html' import render_field, render_submit, render_checkbox, render_errors %}
 
 {% block title %}login{% endblock %}
 
 {% block content %}
-<div class="container container--surface">
-    <!-- Field errors -->
-    {% if form.errors %}
-        <ul class="form-errors">
-            {% for _, ferrors in form.errors|dictsort if ferrors %}
-                {% for error in ferrors %}
-                    <li class="form-errors__error">{{ error }}</li>
-                {% endfor %}
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    <form class="form" method="post">
+<div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md">
+    {{ render_errors(form.errors) }}
+    <form method="post">
         {{ form.csrf_token }}
         {{ render_field(form.student_number) }}
         {{ render_field(form.password) }}
-        <div class="form__input">
-            {{ form.remember.label(class="form__input__label") }}
-            {{ form.remember(class="form__input__box") }}
-        </div>
-        {{ form.submit(class="form__input__submit") }}
+        {{ render_checkbox(form.remember) }}
+        {{ render_submit(form.submit) }}
     </form>
 </div>
 {% endblock %}

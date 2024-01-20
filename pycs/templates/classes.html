@@ -1,24 +1,15 @@
 {% extends 'base.html' %}
-
+{% from '_lists.html' import render_list_item, render_list_sep %}
 {% block title %}pycs/classes{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="container--surface ass-list">
-        {% for class in current_user.classes %}
-        <div class="ass-list__ass">
-            <div class="">
-                <div class="ass__name">
-                    <a class="ass_name__link" href="{{ url_for('main.student_home', class_id=class.id) }}">{{ class.course_code }}</a>
-                </div>
-                <div class="ass__due">Sem: {{ class.sem }}, {{ class.year }}</div>
-            </div>
-        </div>
+<div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md flex flex-col gap-8">
+    {% for class in current_user.classes %}
+        {{ render_list_item(class.course_code, url_for('main.student_home', class_id=class.id), 'Sem: ' ~ class.sem|string ~ ', ' + class.year|string) }}
         {% if not loop.last %}
-        <hr class="surface-divider">
+        {{ render_list_sep() }}
         {% endif %}
-        {% endfor %}
-        </div>
-</div>
+    {% endfor %}
+    </div>
 {% endblock %}
 

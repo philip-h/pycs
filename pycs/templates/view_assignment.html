@@ -1,50 +1,40 @@
 {% extends 'base.html' %}
+{% from '_formhelpers.html' import render_submit_manual, render_file_input, render_errors %}
 
 {% block title %}pycs/assignment{% endblock %}
 
 {% block content%}
-<div class="container">
-  <h1 class="assignment-title">{{ assignment.name }}</h1>
-  <h2 class="assignment-title-instructions">Instructions</h2>
-  <p>{{ instructions|safe }}</p>
+<!--  Instructions -->
+<h1 class="text-2xl text-center">{{ assignment.name }}</h1>
+<div class="prose prose-pre:bg-nord-6  dark:prose-invert dark:prose-pre:bg-nord-0  mb-4">
+  {{ instructions|safe }}
 </div>
+
+<hr class="border-nord-0 dark:border-nord-6 -mx-4 my-8">
+
 {% if form %}
-<div class="container">
-  <div class="container--surface">
-    <!-- Field errors -->
-    {% if form.errors %}
-    <ul class="form-errors">
-        {% for _, ferrors in form.errors|dictsort if ferrors %}
-            {% for error in ferrors %}
-                <li class="form-errors__error">{{ error }}</li>
-            {% endfor %}
-        {% endfor %}
-    </ul>
-    {% endif %}
-    
-    <form action="" method="post" enctype="multipart/form-data">
-      {{ form.csrf_token }}
-      <div class="form__input">
-        {{ form.code(class="form__input__file") }}
-      </div>
-      <input class="form__input__submit" type="submit" value={{ "Upload" if not data else "ReUpload" }}>
-    </form>
-  </div>
+<div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md my-8">
+  {{ render_errors(form.errors) }} 
+  <form action="" method="post" enctype="multipart/form-data">
+    {{ form.csrf_token }}
+    {{ render_file_input(form.code) }} 
+    {{ render_submit_manual('Upload' if not data else 'ReUpload')}}
+  </form>
 </div>
 {% endif %}
 
-<div class="container assignment-info">
+<div class="flex justify-between items-end">
   {% if data %}
-  <h2 class="assignment-info__title">Grade: {{ data.score }} / {{ assignment.total_points }}</h2>
+  <h2 class="text-xl">Grade: {{ data.score }} / {{ assignment.total_points }}</h2>
   {% else %}
-  <h2 class="assignment-info__title">Not submitted yet!</h2>
+  <h2 class="text-xl">Not submitted yet!</h2>
   {% endif %}
-  <p class="assignment-info__due">Due: {{ assignment.due_date.strftime("%a %b %d, %Y @ %H:%M") }}</p>
+  <p>Due: {{ assignment.due_date.strftime("%a %b %d, %Y @ %H:%M") }}</p>
 </div>
 
-<div class="container assignment-comments">
+<div class="my-8">
   {% if data %}
-  <pre class="assignment-comment">{{ data.comments }}</pre>
+  <pre class="font-mono">{{ data.comments }}</pre>
   {% endif %}
 </div>
 {% endblock %}

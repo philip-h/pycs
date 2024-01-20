@@ -1,56 +1,21 @@
 {% extends 'base.html' %}
+{% from '_lists.html' import render_list_item, render_list_sep %}
 
 {% block title %}pycs/teacher/{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="container--surface ass-list">
-        <div class="ass-list__ass">
-            <div class="ass__name">
-                <a class="ass__name__link" href="{{ url_for('.view_students') }}">Manage Students</a>
-            </div>
-        </div>
-
-        <hr class="surface-divider">
-
-        <div class="ass-list__ass">
-            <div class="ass__name">
-                <a class="ass__name__link" href="{{ url_for('.view_assignments') }}">Manage Assignments</a>
-            </div>
-        </div>
-
-        <hr class="surface-divider">
-
-        <div class="ass-list__ass">
-            <div class="ass__name">
-                <a class="ass__name__link" href="{{ url_for('.view_classes') }}">Manage Classes</a>
-            </div>
-        </div>
-
-        <hr class="surface-divider">
-
-        <div class="ass-list__ass">
-            <div class="ass__name">
-                <a class="ass__name__link" href="{{ url_for('.import_marks') }}">Import Marks</a>
-            </div>
-        </div>
-
-        <hr class="surface-divider">
-
-        <div class="ass-list__ass">
-            <div class="ass__name">
-                <a class="ass__name__link" href="{{ url_for('.export_3u_marks') }}">Export ICS3U Marks</a>
-            </div>
-        </div>
-
-        <hr class="surface-divider">
-
-        <div class="ass-list__ass">
-            <div class="ass__name">
-                <a class="ass__name__link" href="{{ url_for('.export_4u_marks') }}">Export ICS4U Marks</a>
-            </div>
-        </div>
-    </div>
+<div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md flex flex-col gap-8">
+    {{ render_list_item('Manage Students', url_for('.view_students'), 'See student grades and assignment outputs')}}
+    {{ render_list_sep() }}
+    {{ render_list_item('Manage Assignments', url_for('.view_assignments'), 'View, edit, and create new assignments')}}
+    {{ render_list_sep() }}
+    {{ render_list_item('Manage Classes', url_for('.view_classes'), 'View, edit, and create new classes')}}
+    {{ render_list_sep() }}
+    {{ render_list_item('Import Marks', url_for('.import_marks'), 'Import marks into Pycs (Currently not implemented)')}}
+    {{ render_list_sep() }}
+    {{ render_list_item('Export ICS3U Marks', url_for('.export_3u_marks'), 'Export marks for all students in ICS3U')}}
+    {{ render_list_sep() }}
+    {{ render_list_item('Export ICS4U Marks', url_for('.export_4u_marks'), 'Export marks for all students in ICS4U')}}
 </div>
 {% endblock %}
 

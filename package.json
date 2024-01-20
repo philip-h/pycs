@@ -5,7 +5,13 @@
   "repository": "git@github.com:philip-h/pycs.git",
   "author": "philip-h <philip.habib6347@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "serve": "python run.py",
+    "tailwind": "yarn tailwindcss -i pycs/static/input.css -o pycs/static/style.css --watch",
+    "runall": "yarn serve & yarn tailwind"
+  },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.10",
     "tailwindcss": "^3.4.1"
   }
 }

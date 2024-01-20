@@ -81,6 +81,7 @@ def assignments_scores_to_dict(assignments_scores):
                     "name": a.name,
                     "due_date": a.due_date,
                     "score": score,
+                    "total_points": a.total_points,
                     "total": a.total_points,
                     "class_id": a.class_id,
                 }

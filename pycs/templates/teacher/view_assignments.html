@@ -1,32 +1,28 @@
 {% extends 'base.html' %}
+{% from '_lists.html' import render_list_item, render_list_sep %}
+{% from '_button.html' import button_link %}
 
 {% block title %}pycs/teacher/assignments{% endblock %}
 
 {% block content %}
-<div class="container">
-    <a href="/teacher/assignments/new" class="button-link">New Assignment</a>
+<div class="mb-4">
+    {{ button_link(url_for('.view_edit_assignment'), 'New Assignment') }}
 </div>
-<div class="container">
-    <div class="container--surface ass-list">
-        {% if assignments|length == 0 %}
-        <p>Oops... There are no assignments in pycs...</p>
-        {% endif %}
-        {% for a in assignments %}
-        <div class="ass-list__ass""> 
-            <div>
-                <div class="ass__name">
-                    <a class="ass__name__link" href="{{ url_for('.view_edit_assignment', a_id=a.id) }}">{{ a.name }}</a>
-                </div>
-                <div class="ass__due">{{ a.classroom.course_code }}</div>
-            </div>
-        </div>
-        {% if not loop.last %}
-        <hr class="surface-divider">
-        {% endif %}
-        {% endfor %}
-    </div>
+<div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md flex flex-col gap-8">
+    {% if assignments|length == 0 %}
+    <p>Oops... There are no assignments in pycs...</p>
+    {% endif %}
+    {% for a in assignments %}
+        {{ render_list_item(
+                title=a.name,
+                title_url=url_for('.view_edit_assignment', a_id=a.id),
+                sub_title=a.classroom.course_code
+           )
+        }}
 
+        {% if not loop.last %}
+        {{ render_list_sep() }}
+        {% endif %}
+    {% endfor %}
 </div>
 {% endblock %}
-
-

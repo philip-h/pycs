@@ -1,3 +1,6 @@
+{% from '_button.html' import button_link %}
+{% from '_lists.html' import render_list_sep %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,44 +8,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark light">
   <title>~/{% block title %}{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <!-- Syntax Highlighting -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nord.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/a11y-light.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/a11y-dark.css" media="screen and (prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.css"/>
 
-  <script>hljs.highlightAll();</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
+  <script>
+    hljs.addPlugin(new CopyButtonPlugin());
+    hljs.highlightAll();
+  </script>
 </head>
-<body class="app">
-  <nav class="nav">
-    <div class="nav__brand">
-      <a class="nav__brand__link" href="{{ url_for('main.index') }}">PYCS</a>
-    </div>
+<body class="bg-nord-6 text-nord-0 dark:bg-nord-0 dark:text-nord-6 mb-8">
+  <nav class="flex justify-between items-center p-4 bg-nord-4 dark:bg-nord-1 relative">
+    <a class="text-2xl" href="{{ url_for('main.index') }}">PYCS</a>
     {% if current_user.is_authenticated %}
-        <p>Hey {{ current_user.first_name }}!</p>
-        <div class="nav__menu-button" id="navMenuButton">
-          <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 32 32" width="16px" fill="currentColor"><path d="M13 16c0 1.654 1.346 3 3 3s3-1.346 3-3-1.346-3-3-3-3 1.346-3 3zM13 26c0 1.654 1.346 3 3 3s3-1.346 3-3-1.346-3-3-3-3 1.346-3 3zM13 6c0 1.654 1.346 3 3 3s3-1.346 3-3-1.346-3-3-3-3 1.346-3 3z"/></svg>
-        </div>
-        <div class="container container--surface nav__menu" id="navMenu">
-          <div class="nav__menu__items">
-            {% if current_user.is_admin %}
-              <a class="nav__menu__item" href="{{ url_for('teacher.index') }}">Admin</a>
-              <hr class="surface-divider">
-            {% endif %}
-            <a class="nav__menu__item" href="{{ url_for('auth.change_pass') }}">Change Password</a>
-            <hr class="surface-divider">
-            <a class="nav__menu__item" href="{{ url_for('auth.logout') }}">Logout</a>
-          </div>
+        <p>Hey {{ current_user.first_name }}!{% block studname %}{% endblock %}</p>
+        <div class="flex items-center justify-center gap-4">
+          {% if current_user.is_admin %}
+              <a href="{{ url_for('teacher.index') }}" class="text-nord-10 hover:text-nord-8 dark:text-nord-8 dark:hover:text-nord-10 transition-colors">Admin</a>
+          {% endif %}
+          <a href="{{ url_for('auth.change_pass') }}" class="text-nord-10 hover:text-nord-8 dark:text-nord-8 dark:hover:text-nord-10 transition-colors">Change Password</a>
+          <a href="{{ url_for('auth.logout') }}" class="text-nord-10 hover:text-nord-8 dark:text-nord-8 dark:hover:text-nord-10 transition-colors">Logout</a>
         </div>
     {% else %}
-        <div class="nav__links">
-          <a class="nav__link" href="{{ url_for('auth.register') }}">Register</a>
-          <a class="nav__link" href="{{ url_for('auth.login') }}">Login</a>
+        <div class="flex items-center justify-center gap-4">
+          {{ button_link(url_for('auth.register'), 'Register')}}
+          {{ button_link(url_for('auth.login'), 'Login')}}
         </div>
     {% endif %}
   </nav> 
 
-  {% block content %}{% endblock %}
-  <script src="{{ url_for('static', filename='script.js')}}"></script>
+  <div class="container mx-auto p-4">
+    {% block content %}{% endblock %}
+  </div>
 </body>
 </html>
 

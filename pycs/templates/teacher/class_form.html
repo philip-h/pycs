@@ -1,16 +1,17 @@
 {% extends 'base.html' %}
 {% from '_formhelpers.html' import render_field, render_submit, render_errors %}
 
-{% block title %}register{% endblock %}
+{% block title %}~/pycs/teacher/class{% endblock %}
 
 {% block content %}
-<div class="bg-nord-1 shadow-lg p-8 rounded-md">
+<div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md">
     {{ render_errors(form.errors) }}
     <form method="post">
         {{ form.csrf_token }}
-        {{ render_field(form.current_pass) }}
-        {{ render_field(form.new_pass) }}
-        {{ render_field(form.confirm_new_pass) }}
+        {{ render_field(form.course_code) }}
+        {{ render_field(form.year) }}
+        {{ render_field(form.sem) }}
+        {{ render_field(form.teacher_id) }}
         {{ render_submit(form.submit) }}
     </form>
 </div>

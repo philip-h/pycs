@@ -1,27 +1,28 @@
 {% extends 'base.html' %}
+{% from '_lists.html' import render_list_item, render_list_sep %}
 
 {% block title %}pycs/teacher/classes{% endblock %}
 
 {% block content %}
-<div class="container">
-    <a href="/teacher/classes/new" class="button-link">New Classroom</a>
+<div class="mb-4">
+    {{ button_link(url_for('.view_edit_classes'), 'New Classroom') }}
 </div>
-<div class="container">
-    <div class="container--surface ass-list">
-        {% if classrooms|length == 0 %}
-        <p>Oops... There are no classrooms in pycs...</p>
+<div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md flex flex-col gap-8">
+    {% if classrooms|length == 0 %}
+    <p>Oops... There are no classrooms in pycs...</p>
+    {% endif %}
+    {% for classroom in classrooms %}
+        {{ render_list_item(
+                title=classroom.course_code,
+                title_url=url_for('.view_edit_classes', class_id=classroom.id),
+                sub_title=classroom.year|string ~ ".sem" ~ classroom.sem|string
+           )
+        }}
+
+        {% if not loop.last %}
+        {{ render_list_sep() }}
         {% endif %}
-        {% for classroom in classrooms %}
-        <div class="ass-list__ass">
-            <div>
-                <div class="ass__name">
-                    <a class="ass__name__link" href="{{ url_for('.view_edit_classes', class_id=classroom.id) }}">{{ classroom.course_code }}</a>
-                </div>
-                <div class="ass__due">{{ classroom.year }}.sem{{ classroom.sem }}</div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
+    {% endfor %}
 </div>
 {% endblock %}
 

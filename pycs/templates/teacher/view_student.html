@@ -1,34 +1,26 @@
 {% extends 'base.html' %}
+{% from '_lists.html' import render_list_item, render_list_sep %}
 
 {% block title %}pycs/teacher/student{% endblock %}
+{% block studname %} -- {{user.first_name}}{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2 class="current-avg">{{ student_avg }}%</h2>
-    {% for unit, assignments in assignments.items() %}
-    <h1 class="unit-name">{{ unit }}</h1>
-    <div class="container--surface ass-list">
-        {% for a in assignments %}
-        <div class="ass-list__ass">
-            <div class="">
-                <div class="ass__name">
-                    <a class="ass__name__link {{ 'ass__name__link--overdue' if a.due_date < today }}" href="{{ url_for('.view_student_assignment', student_number=user.student_number, class_id=class_id, a_id=a.id)  }}">{{ a.name }}</a>
-                </div>
-                <div class="ass__due">Due: {{ a.due_date.strftime("%a %b %d, %Y @ %H:%M") }}</div>
-            </div>
-            <div>
-                {% if a.score is not none %}
-                <span class="ass__score">{{ a.score }}</span>
-                {% endif %}
-                <span> / {{ a.total }}</span>
-            </div>
-        </div>
+<h2 class="text-2xl text-right text-nord-14 mb-4">{{ student_avg }}%</h2>
+{% for unit, assignments in assignments.items() %}
+<h1 class="text-2xl my-4">{{ unit }}</h1>
+<div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md flex flex-col gap-8">
+    {% for a in assignments %}
+        {{ render_list_item(
+            title=a.name, 
+            title_url=url_for('.view_student_assignment', student_number=user.student_number, class_id=class_id, a_id=a.id),
+            sub_title='Due: ' ~ a.due_date.strftime("%a %b %d, %Y @ %H:%M"), 
+            score=' ' if a.score is none else a.score|string,
+            total_points=a.total_points)
+        }}
         {% if not loop.last %}
-        <hr class="surface-divider">
+        {{ render_list_sep() }}
         {% endif %}
-        {% endfor %}
-    </div>
     {% endfor %}
 </div>
+{% endfor %}
 {% endblock %}
-

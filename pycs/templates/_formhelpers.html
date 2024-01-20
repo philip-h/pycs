@@ -1,7 +1,43 @@
 {% macro render_field(field) %}
-    <div class="form__input">
-        {{ field.label(class="form__input__label") }}
-        {{ field(class="form__input__field", **kwargs)|safe }}
+    <div class="mb-4">
+        {{ field.label(class="block mb-2") }}
+        {{ field(class="w-full p-1 rounded-md", **kwargs)|safe }}
     </div>
 {% endmacro %}
+
+{% macro render_submit(submit) %}
+   {{ submit(class="px-4 py-2 rounded-md border border-nord-10 dark:border-nord-8 transition-colors hover:bg-nord-10 dark:hover:bg-nord-8 active:bg-nord-7 dark:active:bg-nord-9 focus:bg-nord-10 dark:focus:bg-nord-8") }}
+{% endmacro %}
+
+{% macro render_submit_manual(button_text) %}
+   <input type="submit" class="px-4 py-2 rounded-md border border-nord-10 dark:border-nord-8 transition-colors hover:bg-nord-10 dark:hover:bg-nord-8 active:bg-nord-7 dark:active:bg-nord-9 focus:bg-nord-10 dark:focus:bg-nord-8" value="{{ button_text }}"/>
+{% endmacro %}
+
+{% macro render_checkbox(checkbox) %}
+    <div class="mb-4">
+        {{ checkbox.label(class="mb-2") }}
+        {{ checkbox(class="ml-2") }}
+    </div>
+{% endmacro %}
+
+{% macro render_file_input(file_input) %}
+      <div class="mb-4">
+        {{ file_input(class="p-2 hover:cursor-pointer file:py-2 file:border file:border-nord-10 dark:file:border-nord-8 file:rounded-md file:bg-nord-4 dark:file:bg-nord-10 file:transition-colors hover:file:bg-nord-10 dark:hover:file:bg-nord-8") }}
+      </div>
+{% endmacro %}
+
+{% macro render_errors(errors) %}
+    <!-- Field errors -->
+    {% if errors %}
+        <ul>
+            {% for _, ferrors in errors|dictsort if ferrors %}
+                {% for error in ferrors %}
+                    <li class="bg-nord-11 p-4 rounded-md mb-4">{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}
+
+
 
