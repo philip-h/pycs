@@ -8,21 +8,34 @@
 <div class="mb-4">
     {{ button_link(url_for('.view_edit_assignment'), 'New Assignment') }}
 </div>
+
+<div class="mb-4">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li class="bg-nord-11 p-4 rounded-md mb-4">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+</div>
+
 <div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md flex flex-col gap-8">
     {% if assignments|length == 0 %}
     <p>Oops... There are no assignments in pycs...</p>
     {% endif %}
     {% for a in assignments %}
-        {{ render_list_item(
-                title=a.name,
-                title_url=url_for('.view_edit_assignment', a_id=a.id),
-                sub_title=a.classroom.course_code
-           )
-        }}
+    {{ render_list_item(
+    title=a.name,
+    title_url=url_for('.view_edit_assignment', a_id=a.id),
+    sub_title=a.classroom.course_code
+    )
+    }}
 
-        {% if not loop.last %}
-        {{ render_list_sep() }}
-        {% endif %}
+    {% if not loop.last %}
+    {{ render_list_sep() }}
+    {% endif %}
     {% endfor %}
 </div>
 {% endblock %}

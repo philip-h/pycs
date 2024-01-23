@@ -1,13 +1,12 @@
-
 {% extends 'base.html' %}
-{% from '_formhelpers.html' import render_field, render_submit, render_checkbox, render_errors %}
+{% from '_formhelpers.html' import render_field, render_file_input, render_submit, render_checkbox, render_errors %}
 
 {% block title %}pycs/teacher/assignment{% endblock %}
 
 {% block content %}
 <div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md">
     {{ render_errors(form.errors) }}
-    <form method="post">
+    <form action="" method="post" enctype="multipart/form-data">
         {{ form.csrf_token }}
         {{ render_field(form.name) }}
         {{ render_field(form.instructions) }}
@@ -19,8 +18,8 @@
         {{ render_checkbox(form.submission_required) }}
         {{ render_field(form.weight) }}
         {{ render_field(form.class_id) }}
+        {{ render_file_input(form.unit_test_upload) }}
         {{ render_submit(form.submit) }}
     </form>
 </div>
 {% endblock %}
-

@@ -11,7 +11,9 @@ from flask import (
     render_template,
     url_for,
     send_file,
+    flash
 )
+from werkzeug.utils import secure_filename
 from pycs.controllers import user as user_controller
 from pycs.controllers import assignment as ass_controller
 from pycs.controllers import classroom as class_controller
@@ -115,12 +117,46 @@ def view_edit_assignment(a_id: int | None = None):
     form = AssignmentForm(obj=assignment)
 
     if form.validate_on_submit():
+        # Commit changes to database
         form.populate_obj(assignment)
         if a_id is not None:
             commit_change()
         else:
             ass_controller.create_assignment(assignment)
 
+        # Upload required pytest / junit test file
+        uploaded_file = form.unit_test_upload.data
+        filename = secure_filename(uploaded_file.filename)
+        _, ext = os.path.splitext(filename)
+        upload_error = None
+        if ext == ".py":
+            pytest_upload_dir = os.path.join(current_app.config["UPLOAD_FOLDER"], "tests")
+            if not os.path.exists(pytest_upload_dir):
+                os.makedirs(pytest_upload_dir)
+
+            upload_path = os.path.join(pytest_upload_dir, filename)
+
+            try:
+                uploaded_file.save(pytest_upload_dir)
+            except OSError:
+                upload_error = f"Could not upload file {filename}: OSError"
+        elif ext == ".java":
+            junit_upload_dir = os.path.join(current_app.config["UPLOAD_FOLDER"], "tests-java")
+            if not os.path.exists(junit_upload_dir):
+                os.makedirs(junit_upload_dir)
+
+            upload_path = os.path.join(junit_upload_dir, filename)
+
+            try:
+                uploaded_file.save(upload_path)
+            except OSError:
+                upload_error = f"Could not upload file {filename}: OSError"
+        else:
+            upload_error = f"Could not upload file, not .py or .java" 
+                
+
+        if upload_error is not None:
+            flash(upload_error)
         return redirect(url_for(".view_assignments"))
 
     return render_template("teacher/assignment_form.html", form=form)

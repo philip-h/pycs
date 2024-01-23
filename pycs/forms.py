@@ -13,7 +13,6 @@ from wtforms import (
     PasswordField,
     BooleanField,
     SubmitField,
-    validators,
 )
 from wtforms.validators import DataRequired, EqualTo, Length
 
@@ -109,14 +108,20 @@ class AssignmentForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
     instructions = TextAreaField("Instructions", validators=[DataRequired()])
     unit_name = StringField("Unit Name", validators=[DataRequired()])
-    submission_required = BooleanField("Submission Required?") 
+    submission_required = BooleanField("Submission Required?")
     required_filename = StringField("Required Filename")
     total_points = IntegerField("Total Points", validators=[DataRequired()])
     due_date = DateField("Due Date", validators=[DataRequired()])
     visible = BooleanField("Visible?")
     weight = IntegerField("Weight", validators=[DataRequired()])
     class_id = IntegerField("Class Id", validators=[DataRequired()])
+    unit_test_upload = FileField(
+        validators=[
+            FileAllowed(["py", "java"], "Python code (or java code) only"),
+        ]
+    )
     submit = SubmitField(label="Submit")
+
 
 class ClassroomForm(FlaskForm):
     """New / Edit assignment form"""
