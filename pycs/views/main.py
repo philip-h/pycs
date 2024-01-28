@@ -45,10 +45,8 @@ def student_home(class_id: int):
 
     assignments_scores = ass_controller.get_class_assignments_of_user(
         class_id, current_user.id
-    )
+    ).fetchall()
 
-    # Needed so that the generator doesn't run out the second time I use it
-    assignments_scores = list(assignments_scores)
     assignments = ass_controller.assignments_scores_to_dict(assignments_scores)
     student_avg = ass_controller.calc_overall_avg(assignments_scores)
 
