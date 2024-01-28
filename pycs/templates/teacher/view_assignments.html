@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% from '_lists.html' import render_list_item, render_list_sep %}
 {% from '_button.html' import button_link %}
+{% from '_flash.html' import display_flashes %}
 
 {% block title %}pycs/teacher/assignments{% endblock %}
 
@@ -10,15 +11,7 @@
 </div>
 
 <div class="mb-4">
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul>
-        {% for message in messages %}
-        <li class="bg-nord-11 p-4 rounded-md mb-4">{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
+    {{ display_flashes() }}
 </div>
 
 <div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md flex flex-col gap-8">

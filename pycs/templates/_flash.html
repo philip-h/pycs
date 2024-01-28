@@ -1,0 +1,15 @@
+{% macro display_flashes(field) %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul>
+    {% for category, message in messages %}
+    {% if category == "error" %}
+    <li class="bg-nord-11 p-4 rounded-md mb-4">{{ message }}</li>
+    {% else %}
+    <li class="bg-nord-14 p-4 rounded-md mb-4">{{ message }}</li>
+    {% endif %}
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+{% endmacro %}

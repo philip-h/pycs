@@ -1,9 +1,10 @@
 
-from flask import Blueprint, redirect, render_template, url_for
-from flask_login import login_user, logout_user, current_user
-from pycs.controllers import user as user_controller
-from pycs.forms import RegisterForm, LoginForm, ChangePassForm
+from flask import Blueprint, flash, redirect, render_template, url_for
+from flask_login import current_user, login_user, logout_user
 from sqlalchemy.exc import IntegrityError
+
+from pycs.controllers import user as user_controller
+from pycs.forms import ChangePassForm, LoginForm, RegisterForm
 
 from . import login_required
 
@@ -26,6 +27,7 @@ def register():
                 f"Student {form.student_number.data} is already registered."
             )
         else:
+            flash("Thanks for registering, please enter the class code to continue", "info")
             return redirect(url_for("main.index"))
 
     return render_template("auth/register.html", form=form)
