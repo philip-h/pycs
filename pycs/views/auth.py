@@ -1,14 +1,15 @@
-
 from flask import Blueprint, flash, redirect, render_template, url_for
 from flask_login import current_user, login_user, logout_user
 from sqlalchemy.exc import IntegrityError
 
 from pycs.controllers import user as user_controller
+from pycs.exc import JoinCodeInvalidException
 from pycs.forms import ChangePassForm, LoginForm, RegisterForm
 
 from . import login_required
 
 bp = Blueprint("auth", __name__)
+
 
 @bp.route("/register", methods=["GET", "POST"])
 def register():
@@ -19,22 +20,25 @@ def register():
             new_user = user_controller.create_student(
                 student_number=form.student_number.data,
                 first_name=form.first_name.data,
-                password=form.password.data
+                password=form.password.data,
+                join_code=form.join_code.data,
             )
         except IntegrityError:
             form.student_number.errors.append(
                 f"Student {form.student_number.data} is already registered."
             )
+        except JoinCodeInvalidException as e:
+            form.join_code.errors.append(e)
         else:
-            added = user_controller.add_student_to_class(new_user, form.join_code.data)
-            if not added:
-                form.join_code.errors.append(f"Incorrect class code. Please try again")
-            else:
-                login_user(new_user)
-                flash("Thanks for registering, please enter the class code to continue", "info")
-                return redirect(url_for("main.index"))
+            login_user(new_user)
+            flash(
+                "Thanks for registering, please enter the class code to continue",
+                "info",
+            )
+            return redirect(url_for("main.index"))
 
     return render_template("auth/register.html", form=form)
+
 
 @bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -45,7 +49,9 @@ def login():
 
         user = user_controller.get_user_by_student_number(form.student_number.data)
 
-        if user is None or not user_controller.verify_password(user.password_hash, form.password.data):
+        if user is None or not user_controller.verify_password(
+            user.password_hash, form.password.data
+        ):
             form.student_number.errors.append("Invalid Credentials.")
         else:
             login_user(user, remember)
