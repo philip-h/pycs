@@ -8,20 +8,20 @@
     {{ button_link(url_for('.view_edit_classes'), 'New Classroom') }}
 </div>
 <div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md flex flex-col gap-8">
-    {% if classrooms|length == 0 %}
-    <p>Oops... There are no classrooms in pycs...</p>
-    {% endif %}
     {% for classroom in classrooms %}
         {{ render_list_item(
                 title=classroom.course_code,
                 title_url=url_for('.view_edit_classes', class_id=classroom.id),
-                sub_title=classroom.year|string ~ ".sem" ~ classroom.sem|string
+                sub_title=classroom.year|string ~ ".sem" ~ classroom.sem|string,
+                score=classroom.join_code
            )
         }}
 
         {% if not loop.last %}
         {{ render_list_sep() }}
         {% endif %}
+    {% else %}
+    <p>Oops... There are no classrooms in pycs. "¯\_(ツ)_/¯"</p>
     {% endfor %}
 </div>
 {% endblock %}

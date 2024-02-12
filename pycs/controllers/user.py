@@ -45,16 +45,10 @@ def change_user_password(user, current_pass, new_pass):
     return None
 
 
-def add_student_to_class(user, course_code):
-    if course_code.lower() not in ["classone", "classtwo"]:
-        return False
+def add_student_to_class(user, join_code):
+    """Add student to class based off it's join_code"""
+    the_class = db.session.execute(db.select(Classroom).where(Classroom.join_code == join_code)).scalar_one_or_none() 
 
-    if course_code.lower() == "classone":
-        class_id = 1
-    else:
-        class_id = 2
-
-    the_class = db.session.execute(db.select(Classroom).where(Classroom.id == class_id)).scalar_one_or_none()
     if the_class is None:
         return False
     user.classes.append(the_class)

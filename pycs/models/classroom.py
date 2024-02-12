@@ -10,6 +10,7 @@ class Classroom(db.Model):
     course_code: Mapped[str]
     year: Mapped[int]
     sem: Mapped[int]
+    join_code: Mapped[str] = mapped_column(unique=True)
     teacher_id: Mapped[int]
     assignments: Mapped[list["Assignment"]] = relationship(back_populates="classroom")
     users: Mapped[list["User"]] = relationship(

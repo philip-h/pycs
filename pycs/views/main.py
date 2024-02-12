@@ -1,17 +1,17 @@
 from datetime import datetime
 from http import HTTPStatus
-import markdown
 import os
 from pathlib import Path
 
 from flask import Blueprint, current_app, redirect, render_template, request, url_for
 from flask_login import current_user
-from pycs.controllers import assignment as ass_controller
-from pycs.controllers import user as user_controller
-from pycs.forms import JoinClassForm, UploadCodeForm
-from pycs.grader import GradingStrategy, ICS3UGrader, ICS4UGrader
+import markdown
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
+
+from pycs.controllers import assignment as ass_controller
+from pycs.forms import UploadCodeForm
+from pycs.grader import GradingStrategy, ICS3UGrader, ICS4UGrader
 
 from . import login_required
 
@@ -28,9 +28,7 @@ def index():
     if not current_user.is_authenticated:
         return render_template("landing.html")
 
-    if len(current_user.classes) == 0:
-        return redirect(url_for(".join_class"))
-    elif len(current_user.classes) == 1:
+    if len(current_user.classes) == 1:
         class_id = current_user.classes[0].id
         return redirect(url_for(".student_home", class_id=class_id))
 
@@ -56,24 +54,6 @@ def student_home(class_id: int):
         student_avg=student_avg,
         today=datetime.today(),
     )
-
-
-@bp.route("/app/joinclass", methods=["GET", "POST"])
-@login_required
-def join_class():
-    if len(current_user.classes) != 0:
-        return redirect(url_for("main.index"))
-
-    form = JoinClassForm()
-
-    if form.validate_on_submit():
-        added = user_controller.add_student_to_class(current_user, form.class_code.data)
-        if added:
-            return redirect(url_for("main.index"))
-
-        form.class_code.errors.append(f"Invalid class code.")
-
-    return render_template("joinclass.html", form=form)
 
 
 @bp.route("/app/<int:class_id>/assignment/<int:a_id>", methods=["GET", "POST"])
@@ -150,7 +130,13 @@ def student_assignment(class_id: int, a_id: int):
                     f"Uploaded file must be named {assignment.required_filename}. Yours is {filename}"
                 )
 
-    instructions = markdown.markdown(assignment.instructions, extensions=["fenced_code"])
+    instructions = markdown.markdown(
+        assignment.instructions, extensions=["fenced_code"]
+    )
     return render_template(
-        "view_assignment.html", assignment=assignment, instructions=instructions, data=user_assignment, form=form
+        "view_assignment.html",
+        assignment=assignment,
+        instructions=instructions,
+        data=user_assignment,
+        form=form,
     )

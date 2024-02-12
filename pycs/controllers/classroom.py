@@ -1,9 +1,19 @@
+import uuid
+
 from pycs.extensions import db
 from pycs.models import Classroom
 
-
 def create_class(classroom):
     """Create a class"""
+    
+    join_codes_in_db = db.session.execute(db.select(Classroom.join_code)).scalars().all()
+    # Create a unique class code
+    new_join_code = str(uuid.uuid4())[:5].upper()
+    while new_join_code in join_codes_in_db:
+        new_join_code = str(uuid.uuid4())[:5].upper()
+
+
+    classroom.join_code = new_join_code
     db.session.add(classroom)
     db.session.commit()
 

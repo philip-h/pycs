@@ -47,6 +47,7 @@ class RegisterForm(UserPassForm):
             EqualTo("password", message="Passwords must match."),
         ],
     )
+    join_code = StringField("Join Code", validators=[DataRequired()])
     submit = SubmitField(label="Register")
 
 
@@ -93,13 +94,6 @@ class UploadCodeForm(FlaskForm):
             FileAllowed(["py", "java"], "Python code (or java code) only"),
         ]
     )
-
-
-class JoinClassForm(FlaskForm):
-    """Join class form"""
-
-    class_code = StringField("Class code", validators=[DataRequired()])
-    submit = SubmitField(label="Join")
 
 
 class AssignmentForm(FlaskForm):

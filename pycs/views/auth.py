@@ -21,14 +21,18 @@ def register():
                 first_name=form.first_name.data,
                 password=form.password.data
             )
-            login_user(new_user)
         except IntegrityError:
             form.student_number.errors.append(
                 f"Student {form.student_number.data} is already registered."
             )
         else:
-            flash("Thanks for registering, please enter the class code to continue", "info")
-            return redirect(url_for("main.index"))
+            added = user_controller.add_student_to_class(new_user, form.join_code.data)
+            if not added:
+                form.join_code.errors.append(f"Incorrect class code. Please try again")
+            else:
+                login_user(new_user)
+                flash("Thanks for registering, please enter the class code to continue", "info")
+                return redirect(url_for("main.index"))
 
     return render_template("auth/register.html", form=form)
 
