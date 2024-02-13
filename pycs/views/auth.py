@@ -32,7 +32,7 @@ def register():
         else:
             login_user(new_user)
             flash(
-                "Thanks for registering, please enter the class code to continue",
+                f"Thanks for registering, {new_user.first_name}!",
                 "info",
             )
             return redirect(url_for("main.index"))

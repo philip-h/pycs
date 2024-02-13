@@ -1,10 +1,16 @@
 {% extends 'base.html' %}
 {% from '_lists.html' import render_list_item, render_list_sep %}
+{% from '_flash.html' import display_flashes %}
 
 {% block title %}pycs/{% endblock %}
 
 {% block content %}
 <h2 class="text-2xl text-right text-nord-14 mb-4">{{ student_avg }}%</h2>
+
+<div class="mb-4">
+    {{ display_flashes() }}
+</div>
+
 {% for unit, assignments in assignments.items() %}
 <h1 class="text-2xl my-4">{{ unit }}</h1>
 <div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md flex flex-col gap-8">
