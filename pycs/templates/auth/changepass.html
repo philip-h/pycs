@@ -4,7 +4,7 @@
 {% block title %}register{% endblock %}
 
 {% block content %}
-<div class="bg-nord-1 shadow-lg p-8 rounded-md">
+<div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md">
     {{ render_errors(form.errors) }}
     <form method="post">
         {{ form.csrf_token }}
