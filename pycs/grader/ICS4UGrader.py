@@ -1,8 +1,10 @@
+import fileinput
 import itertools
 from pathlib import Path
 import re
-import subprocess
 import shutil
+import subprocess
+import sys
 
 from . import GradingStrategy
 
@@ -180,6 +182,12 @@ class ICS4UGrader(GradingStrategy):
         junit_test_filename = f"Test{code_filename}"
         abs_junit_test_path = student_dir.parent / "tests-java" / junit_test_filename 
         shutil.copy2(abs_junit_test_path, student_dir)
+
+        # Remove any package statements at top of code. Code is run outside of folders/packages
+        for line in fileinput.input(student_dir / code_filename, inplace=1):
+            if "package" in line:
+                line = line.replace(line, "")
+            sys.stdout.write(line)
 
         # Check if java code compiles
         code_compiles, err_message = self._does_code_compile(code_filename, student_dir)
