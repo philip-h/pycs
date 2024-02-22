@@ -4,15 +4,15 @@ Flask-WTF Form definitions
 """
 
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired, FileAllowed
+from flask_wtf.file import FileAllowed, FileField, FileRequired
 from wtforms import (
+    BooleanField,
     DateField,
     IntegerField,
-    StringField,
-    TextAreaField,
     PasswordField,
-    BooleanField,
+    StringField,
     SubmitField,
+    TextAreaField,
 )
 from wtforms.validators import DataRequired, EqualTo, Length
 
@@ -94,6 +94,18 @@ class UploadCodeForm(FlaskForm):
             FileAllowed(["py", "java"], "Python code (or java code) only"),
         ]
     )
+
+
+class UploadMarksForm(FlaskForm):
+    """Upload marks Form"""
+
+    marks = FileField(
+        validators=[
+            FileRequired(),
+            FileAllowed(["csv"], "Marks must be in CSV format."),
+        ]
+    )
+    submit = SubmitField("Upload marks")
 
 
 class AssignmentForm(FlaskForm):

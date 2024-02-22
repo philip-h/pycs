@@ -131,7 +131,7 @@ def student_assignment(class_id: int, a_id: int):
                 )
 
     instructions = markdown.markdown(
-        assignment.instructions, extensions=["fenced_code"]
+        assignment.instructions, extensions=["fenced_code", "tables", "attr_list"]
     )
     return render_template(
         "view_assignment.html",

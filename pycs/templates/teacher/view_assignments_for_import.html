@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% from '_lists.html' import render_list_item, render_list_sep %}
+{% from '_button.html' import button_link %}
+{% from '_flash.html' import display_flashes %}
+
+{% block title %}pycs/teacher/import/assignments{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    {{ display_flashes() }}
+</div>
+
+<div class="bg-nord-4 dark:bg-nord-1 shadow-lg p-8 rounded-md flex flex-col gap-8">
+    {% if assignments|length == 0 %}
+    <p>Oops... There are no assignments in pycs...</p>
+    {% endif %}
+    {% for a in assignments %}
+    {{ render_list_item(
+    title=a.name,
+    title_url=url_for('.assignment_import', a_id=a.id),
+    sub_title=a.classroom.course_code
+   )
+    }}
+
+    {% if not loop.last %}
+    {{ render_list_sep() }}
+    {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}

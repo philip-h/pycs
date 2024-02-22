@@ -1,8 +1,10 @@
-from pycs.extensions import db
-from pycs.models import Assignment, UserAssignment
 from datetime import datetime
 
+from flask import flash
 from sqlalchemy.exc import IntegrityError
+
+from pycs.extensions import db
+from pycs.models import Assignment, User, UserAssignment
 
 
 def create_assignment(new_ass):
@@ -13,9 +15,11 @@ def create_assignment(new_ass):
 
 def get_all_assignments():
     """Get all assignments"""
-    return db.session.execute(
-        db.select(Assignment).order_by(db.desc(Assignment.id))
-    ).scalars().all()
+    return (
+        db.session.execute(db.select(Assignment).order_by(db.desc(Assignment.id)))
+        .scalars()
+        .all()
+    )
 
 
 def get_assignment_by_id(a_id: int):
@@ -43,13 +47,11 @@ def get_class_assignments_of_user(class_id: int, user_id: int):
 
 def score_ass(user, assignment, score, comments):
     """Add a new User_Assignment association, thus grading the student's assignment"""
-    user_assignment = UserAssignment(score=score, comments=comments)
+    user_assignment = UserAssignment(user_id=user.id, score=score, comments=comments)
+    db.session.commit()
     assignment.user_associations.append(user_assignment)
     user.assignment_associations.append(user_assignment)
-    try:
-        db.session.commit()
-    except IntegrityError:
-        pass
+    db.session.commit()
 
 
 def update_ass_score(user_assignment, score, comments):
@@ -57,6 +59,45 @@ def update_ass_score(user_assignment, score, comments):
     user_assignment.score = score
     user_assignment.comments = comments
     db.session.commit()
+
+
+def upload_assignment_grades(a_id, grades) -> int:
+    """Upload grades from a csv file
+
+    Returns:
+        The number of grades successfully input
+    """
+
+    count = 0
+    ass = get_assignment_by_id(a_id)
+    if ass is None:
+        return count
+
+    for grade_item in grades:
+        if "Score" not in grade_item or "Email" not in grade_item:
+            flash("CSV must contain Email and Score headings", "error")
+            return 0
+        # D2L has student number under Email column
+        student_number = grade_item["Email"]
+        user = db.session.execute(
+            db.select(User).where(User.student_number == student_number)
+        ).scalar_one_or_none()
+        if user is None:
+            flash(f"Could not upload marks for {grade_item['First Name']}", "error")
+            continue
+        # Check to see if a score exists
+        ua = db.session.execute(
+            db.select(UserAssignment).where(
+                UserAssignment.user_id == user.id, UserAssignment.assignment_id == a_id
+            )
+        ).scalar_one_or_none()
+        score = float(grade_item["Score"]) if grade_item["Score"].strip() != "" else 0
+        if ua is None:
+            score_ass(user, ass, score, "Uploaded from D2L")
+        else:
+            update_ass_score(ua, score, "Uploaded from D2L")
+        count += 1
+    return count
 
 
 def assignments_scores_to_dict(assignments_scores):
