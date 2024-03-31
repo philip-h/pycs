@@ -8,7 +8,7 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY="dev",
-        SQLALCHEMY_DATABASE_URI = "sqlite:///mac.db",
+        SQLALCHEMY_DATABASE_URI = "sqlite:///2023.sem2.ics3u.db",
         UPLOAD_FOLDER=os.path.join(app.instance_path, "code"),
         EXPORTED_FILES=os.path.join(app.instance_path, "exports"),
     )

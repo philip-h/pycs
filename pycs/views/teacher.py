@@ -129,7 +129,7 @@ def view_edit_assignment(a_id: int | None = None):
             ass_controller.create_assignment(assignment)
 
         # Handle upload of pytest/junit files (optional)
-        if "unit_test" in form:
+        if "unit_test_upload" in form:
             uploaded_file = form.unit_test_upload.data
             filename = secure_filename(uploaded_file.filename)
             _, ext = os.path.splitext(filename)
@@ -240,7 +240,7 @@ def _export_marks(class_id: int) -> (str, str):
     classroom = class_controller.get_classroom_by_id(class_id)
     # Header row
     header = ",".join(
-        ["Name", "Average"]
+        ["Name", "Student Number", "Average"]
         + [
             a.name
             for a in sorted(classroom.assignments, key=lambda x: x.id, reverse=True)
@@ -254,7 +254,7 @@ def _export_marks(class_id: int) -> (str, str):
         ).fetchall()
         avg = ass_controller.calc_overall_avg(assignment_scores)
         body_line = ",".join(
-            [user.first_name, str(avg)]
+            [user.first_name, user.student_number, str(avg)]
             + [str(ua.score) if ua else "0" for _, ua in assignment_scores]
         )
         # body_line = ",".join([user.first_name] + [str(ua.score) for ua in sorted(user.assignment_associations, key=lambda x: x.assignment_id)])
