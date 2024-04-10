@@ -20,7 +20,7 @@ class ICS4UGrader(GradingStrategy):
         file_contents = self.file_contents[::]
         file_contents = list(
             itertools.dropwhile(
-                lambda line: (line.strip() == "" or "import" in line), file_contents
+                lambda line: (line.strip() == "" or "import" in line or "package" in line), file_contents
             )
         )
 

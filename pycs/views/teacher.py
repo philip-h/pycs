@@ -129,7 +129,7 @@ def view_edit_assignment(a_id: int | None = None):
             ass_controller.create_assignment(assignment)
 
         # Handle upload of pytest/junit files (optional)
-        if "unit_test_upload" in form:
+        if form.unit_test_upload.data is not None:
             uploaded_file = form.unit_test_upload.data
             filename = secure_filename(uploaded_file.filename)
             _, ext = os.path.splitext(filename)

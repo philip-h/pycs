@@ -89,10 +89,10 @@ class ICS3UGrader(GradingStrategy):
 
     def grade_ipo_comments(self) -> tuple[float, str]:
         file_string = "\n".join([line.strip().lower() for line in self.file_contents])
-        has_i = re.search(r"^#\s?input$", file_string, re.MULTILINE)
-        has_p = re.search(r"^#\s?processing$", file_string, re.MULTILINE)
-        has_o = re.search(r"^#\s?output$", file_string, re.MULTILINE)
-        has_po = re.search(r"^#\s?processing\s?/\s?output$", file_string, re.MULTILINE)
+        has_i = re.search(r"^#\s?[Ii]nput", file_string, re.MULTILINE)
+        has_p = re.search(r"^#\s?[Pp]rocessing", file_string, re.MULTILINE)
+        has_o = re.search(r"^#\s?[Oo]utput", file_string, re.MULTILINE)
+        has_po = re.search(r"^#\s?[Pp]rocessing\s?/\s?[Oo]utput", file_string, re.MULTILINE)
 
         # Valid ipo comments:
         # All three present
