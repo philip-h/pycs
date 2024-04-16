@@ -20,10 +20,11 @@ class Assignment(db.Model):
     due_date: Mapped[datetime]
     visible: Mapped[bool]
     unit_name: Mapped[str]
-    weight: Mapped[int]
+    weight: Mapped[int] = mapped_column(ForeignKey("weighting.id"))
     class_id: Mapped[int] = mapped_column(ForeignKey("classroom.id"))
-    classroom: Mapped["Classroom"] = relationship(back_populates="assignments")
 
+    weighting: Mapped["Weighting"] = relationship()
+    classroom: Mapped["Classroom"] = relationship(back_populates="assignments")
     user_associations: Mapped[list["UserAssignment"]] = relationship(
         back_populates="assignment"
     )

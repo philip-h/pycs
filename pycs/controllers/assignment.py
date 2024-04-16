@@ -4,7 +4,7 @@ from flask import flash
 from sqlalchemy.exc import IntegrityError
 
 from pycs.extensions import db
-from pycs.models import Assignment, User, UserAssignment
+from pycs.models import Assignment, User, UserAssignment, Weighting
 
 
 def create_assignment(new_ass):
@@ -135,20 +135,21 @@ def calc_overall_avg(assignments_scores) -> float:
     """Calculate the student's average.
     Don't include missing assignments if we are not past the due date
     """
-    marks, weights = [], []
+    # Get weightings from database
+    weightings = db.session.execute(db.select(Weighting)).scalars()
+    marks = {w.weight: [] for w in weightings}
+
     for a, ua in assignments_scores:
         if ua:
-            marks.append(ua.score / a.total_points)
-            weights.append(a.weight)
+            marks[a.weighting.weight].append(ua.score / a.total_points)
         elif a.due_date < datetime.today():
-            marks.append(0)
-            weights.append(a.weight)
+            marks[a.weighting.weight].append(0)
 
-    if len(marks) == 0:
-        avg = 0
-    else:
-        avg = round(
-            (sum(m * w for m, w in zip(marks, weights)) / sum(weights)) * 100, 2
-        )
+    def _safe_len(lst: list) -> int:
+        s = len(lst)
+        return 1 if s == 0 else s
+
+    avg = round(sum((sum(marks[w]) / _safe_len(marks[w]))*w for w in marks), 2)
+
 
     return avg
