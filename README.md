@@ -14,9 +14,25 @@ Pycs is an autograder designed to streamline the assignment submission and gradi
 
 - **Pytest Integration:** Users can view the output of pytest to assess the success of their submissions.
 
+## The process
+
+Students read a description of the assignment
+
+![assignment description](./readme_imgs/pycs_ss1.jpg)
+
+Try to complete the assignment
+
+![assignment code](./readme_imgs/pycs_ss3.jpg)
+
+Submit it to pycs, and look at their errors
+
+![assignment errors](./readme_imgs/pycs_ss2.jpg)
+
+Keep trying and trying until they manage to get a 4/4, passing all of the unit tests, and class conventions!
+
 ## Getting Started
 
-Visit [https://philiph.dev/](https://philiph.dev/) to use Pycs. Currently, I'm the only teacher account on this hosted version (I don't pay enough to DigitalOcean to have this be the server for anyone else who would want to use it.)
+Visit [https://pycs.philiph.dev/](https://pycs.philiph.dev/) to use Pycs. Currently, I'm the only teacher account on this hosted version (I don't pay enough to DigitalOcean to have this be the server for anyone else who would want to use it.)
 
 ## Building Pycs Yourself
 
